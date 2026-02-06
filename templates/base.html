@@ -19,8 +19,8 @@
       <a href="{{ url_for('index') }}" class="site-brand" aria-label="X-Estetik">
         <span class="site-logo" aria-hidden="true">X</span>
         <span class="site-brand-text">
-          <span class="site-brand-kicker">{{ BRAND }}</span>
-          <span class="site-brand-name">X‑Estetik</span>
+          {# Avoid duplicated brand text (BRAND == SITE_NAME by default) #}
+          <span class="site-brand-name">{{ SITE_NAME }}</span>
         </span>
       </a>
 
@@ -79,8 +79,7 @@
         <div class="flex items-center gap-3">
           <div class="h-10 w-10 rounded-2xl bg-slate-900 text-white grid place-items-center font-semibold">X</div>
           <div class="leading-tight">
-            <div class="text-xs uppercase tracking-wide text-slate-500">{{ BRAND }}</div>
-            <div class="font-semibold">X‑Estetik</div>
+            <div class="font-semibold">{{ SITE_NAME }}</div>
           </div>
         </div>
         <p class="mt-4 text-sm text-slate-600 leading-relaxed">
@@ -134,37 +133,22 @@
 
   {% block scripts %}{% endblock %}
 
+  {% block showcase_data %}
   <script>
     // Showcase videos (used on the homepage and /filmy)
     window.STATIC_VERSION = {{ STATIC_VERSION|tojson }};
 
-            // NOTE: keep this list in sync with files present in /static/video/
-    // Hero: video 1.mp4
-    window.X_SHOWCASE = [
-      { src: "{{ video_url('video 1') }}?v={{ STATIC_VERSION }}", title: "video 1", desc: "" },
-      { src: "{{ video_url('video 2') }}?v={{ STATIC_VERSION }}", title: "video 2", desc: "" },
-      { src: "{{ video_url('video 3') }}?v={{ STATIC_VERSION }}", title: "video 3", desc: "" },
-      { src: "{{ video_url('video 4') }}?v={{ STATIC_VERSION }}", title: "video 4", desc: "" },
-      { src: "{{ video_url('video 5') }}?v={{ STATIC_VERSION }}", title: "video 5", desc: "" },
-      { src: "{{ video_url('video 6') }}?v={{ STATIC_VERSION }}", title: "video 6", desc: "" },
-      { src: "{{ video_url('video 7') }}?v={{ STATIC_VERSION }}", title: "video 7", desc: "" },
-      { src: "{{ video_url('video 8') }}?v={{ STATIC_VERSION }}", title: "video 8", desc: "" },
-      { src: "{{ video_url('video 9') }}?v={{ STATIC_VERSION }}", title: "video 9", desc: "" },
-      { src: "{{ video_url('video 10') }}?v={{ STATIC_VERSION }}", title: "video 10", desc: "" },
-      { src: "{{ video_url('video 11') }}?v={{ STATIC_VERSION }}", title: "video 11", desc: "" },
-      { src: "{{ video_url('video 12') }}?v={{ STATIC_VERSION }}", title: "video 12", desc: "" },
-      { src: "{{ video_url('video 13') }}?v={{ STATIC_VERSION }}", title: "video 13", desc: "" },
-      { src: "{{ video_url('video 14') }}?v={{ STATIC_VERSION }}", title: "video 14", desc: "" },
-      { src: "{{ video_url('video 15') }}?v={{ STATIC_VERSION }}", title: "video 15", desc: "" },
-      { src: "{{ video_url('video 16') }}?v={{ STATIC_VERSION }}", title: "video 16", desc: "" },
-      { src: "{{ video_url('video 17') }}?v={{ STATIC_VERSION }}", title: "video 17", desc: "" },
-      { src: "{{ video_url('video 18') }}?v={{ STATIC_VERSION }}", title: "video 18", desc: "" },
-      { src: "{{ video_url('video 19') }}?v={{ STATIC_VERSION }}", title: "video 19", desc: "" },
-      { src: "{{ video_url('video 20') }}?v={{ STATIC_VERSION }}", title: "video 20", desc: "" },
-      { src: "{{ video_url('video 21') }}?v={{ STATIC_VERSION }}", title: "video 21", desc: "" },
-      { src: "{{ video_url('video 22') }}?v={{ STATIC_VERSION }}", title: "video 22", desc: "" }
-    ];
+    // Default showcase clips (homepage).
+    // If R2 clips are configured, use them; otherwise fall back to local HERO ("video 1").
+    {% set v1s = video_urls('video 1') %}
+    {% set fallback_showcase = [
+      {"srcs": (v1s or []), "src": (v1s[0] if v1s else ""), "title": "video 1", "desc": ""}
+    ] %}
+    {% set showcase = (R2_SHOWCASE if (R2_SHOWCASE and (R2_SHOWCASE|length > 0)) else fallback_showcase) %}
+    window.X_SHOWCASE = {{ showcase|tojson }};
   </script>
+{% endblock %}
+
 
 
   <!-- Mobile menu -->

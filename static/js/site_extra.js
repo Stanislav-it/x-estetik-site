@@ -232,6 +232,8 @@
 
     let idx = 0;
     let soundEnabled = false;
+    let srcCandidates = [];
+    let srcCandidateIdx = 0;
 
     const syncSoundUI = () => {
       if (!soundBtn) return;
@@ -260,14 +262,18 @@
       tabs.forEach((t, ti) => t.classList.toggle('is-active', ti === idx));
 
       // Video
-      if (s.src) {
+      srcCandidates = Array.isArray(s.srcs) && s.srcs.length ? s.srcs.filter(Boolean) : (s.src ? [s.src] : []);
+      srcCandidateIdx = 0;
+      const src = srcCandidates[0];
+
+      if (src) {
         // Set attributes defensively (autoplay on mobile requires muted + playsinline)
         videoEl.setAttribute('playsinline', '');
         videoEl.loop = true;
         videoEl.muted = !soundEnabled;
 
-        if (videoEl.src !== s.src) {
-          videoEl.src = s.src;
+        if (videoEl.src !== src) {
+          videoEl.src = src;
         }
 
         try { videoEl.load(); } catch (e) {}
@@ -305,8 +311,19 @@
       syncSoundUI();
     }
 
-    // If decoding fails (e.g. HEVC on Windows), show a helpful message in the subtitle.
+    // If decoding fails or the URL is not a real video, try the next candidate.
     videoEl.addEventListener('error', () => {
+      if (srcCandidates && srcCandidateIdx + 1 < srcCandidates.length) {
+        srcCandidateIdx += 1;
+        const nextSrc = srcCandidates[srcCandidateIdx];
+        if (nextSrc) {
+          videoEl.src = nextSrc;
+          try { videoEl.load(); } catch (e) {}
+          const p = videoEl.play();
+          if (p && typeof p.catch === 'function') p.catch(() => {});
+          return;
+        }
+      }
       if (!descEl) return;
       descEl.textContent = 'Nie można odtworzyć wideo w tej przeglądarce (sprawdź kodek / H.264).';
     });

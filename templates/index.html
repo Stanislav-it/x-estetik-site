@@ -6,8 +6,15 @@
 {% block content %}
 <!-- HERO -->
 <section id="hero" class="hero">
+  {% set hero_srcs = video_urls('video 1') %}
   <video id="heroVideo" class="hero-video" autoplay loop muted playsinline preload="metadata" poster="{{ url_for('static', filename='img/hero_poster.jpg') }}">
-    <source src="{{ video_url('video 1') }}?v={{ STATIC_VERSION }}">
+    {% for src in (hero_srcs or []) %}
+      {% if src.startswith('http') %}
+        <source src="{{ src }}">
+      {% else %}
+        <source src="{{ src }}{{ '&' if '?' in src else '?' }}v={{ STATIC_VERSION }}">
+      {% endif %}
+    {% endfor %}
   </video>
   <div class="hero-overlay" aria-hidden="true"></div>
 

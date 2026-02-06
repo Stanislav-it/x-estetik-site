@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import sqlite3
+from urllib.parse import quote
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -371,14 +372,132 @@ def create_app() -> Flask:
         TIKTOK_URL=get_env("TIKTOK_URL", "https://www.tiktok.com/"),
         TIKTOK_HANDLE=get_env("TIKTOK_HANDLE", "TikTok"),
         DB_PATH=get_env("DB_PATH", str(APP_DIR / "instance" / "app.db")),
+
+        # R2 public bucket base URL for /filmy showcase clips.
+        # Example: https://<pub-...>.r2.dev
+        FILMY_BASE_URL=get_env("FILMY_BASE_URL", "https://pub-6b9f87ec02e04dc88c5b18144e88754a.r2.dev"),
+
+        # Comma-separated list of MP4 object names in the R2 bucket for /filmy.
+        FILMY_FILES=get_env(
+            "FILMY_FILES",
+            "video 5.mp4,video 8.mp4,video 9.mp4,video 10.mp4,video 11.mp4,video 14.mp4,video 15.mp4,video 16.mp4,video 17.mp4,video 18.mp4,video 19.mp4,video 20.mp4,video 21.mp4",
+        ),
+
+        # Optional external override for the HERO video ("video 1").
+        # If set, the site will use this URL *only when the local file is missing*.
+        # You can pass either:
+        #   - a Google Drive share URL (e.g. https://drive.google.com/file/d/<id>/view?...)
+        #   - or a raw Drive file id.
+        # Default: the user-provided Drive file.
+        VIDEO_1_URL=get_env(
+            "VIDEO_1_URL",
+            "https://drive.google.com/file/d/1GeLb0EQsq8bxrajZ74LNE6UvUUkiPBy0/view?usp=sharing",
+        ),
     )
+
+    def build_r2_showcase() -> list[dict]:
+        """Build a list of showcase clips from the public R2 bucket (used on homepage + /filmy)."""
+        base = (app.config.get("FILMY_BASE_URL") or "").strip().rstrip("/")
+        files_raw = (app.config.get("FILMY_FILES") or "").strip()
+
+        default_files = [
+            "video 5.mp4",
+            "video 8.mp4",
+            "video 9.mp4",
+            "video 10.mp4",
+            "video 11.mp4",
+            "video 14.mp4",
+            "video 15.mp4",
+            "video 16.mp4",
+            "video 17.mp4",
+            "video 18.mp4",
+            "video 19.mp4",
+            "video 20.mp4",
+            "video 21.mp4",
+        ]
+
+        files = [s.strip() for s in files_raw.split(",") if s.strip()] if files_raw else default_files
+
+        # Sort naturally by the first number in the name, if present.
+        def num_key(name: str) -> int:
+            m = re.search(r"(\d+)", name)
+            return int(m.group(1)) if m else 10**9
+
+        files = sorted(files, key=lambda s: (num_key(s), s.lower()))
+
+        showcase: list[dict] = []
+        for fn in files:
+            url = f"{base}/{quote(fn)}" if base else ""
+            title = fn.rsplit(".", 1)[0]
+            if url:
+                showcase.append({"src": url, "srcs": [url], "title": title, "desc": ""})
+
+        return showcase
 
     (APP_DIR / "instance").mkdir(parents=True, exist_ok=True)
     init_db(app)
     ensure_qr_codes(app)
 
+    def extract_drive_file_id(url_or_id: str) -> str:
+        """Extract Google Drive file id from a share URL, or return the id as-is."""
+        if not url_or_id:
+            return ""
+        s = url_or_id.strip()
+        # Already looks like a raw Drive file id
+        if re.fullmatch(r"[A-Za-z0-9_-]{10,}", s) and "http" not in s.lower():
+            return s
+        # Common share URL: https://drive.google.com/file/d/<id>/view
+        m = re.search(r"/file/d/([A-Za-z0-9_-]+)", s)
+        if m:
+            return m.group(1)
+        # open?id=<id>
+        m = re.search(r"[?&]id=([A-Za-z0-9_-]+)", s)
+        if m:
+            return m.group(1)
+        return ""
+
+    def drive_direct_download_candidates(url_or_id: str) -> list[str]:
+        """Return a small list of direct-download URLs for a Drive file."""
+        fid = extract_drive_file_id(url_or_id)
+        if not fid:
+            return []
+        # NOTE: Public Drive files >100MB sometimes need a confirm flag.
+        return [
+            f"https://drive.google.com/uc?export=download&confirm=t&id={fid}",
+            f"https://drive.usercontent.google.com/download?id={fid}&export=download&confirm=t",
+        ]
+
+    def is_external_url(url: str) -> bool:
+        return bool(url) and bool(re.match(r"^https?://", url.strip(), flags=re.IGNORECASE))
+
     @app.context_processor
     def inject_globals():
+        def resolve_video_urls(video_base: str) -> list[str]:
+            """Return a list of candidate URLs for a given video base name."""
+            base = (video_base or "").strip()
+            if not base:
+                return []
+
+            # Prefer local static file when present.
+            local = resolve_static_video(base)
+            if local:
+                return [local]
+
+            # For HERO video ("video 1"), fall back to an external URL (e.g. Google Drive).
+            if base.lower() == "video 1":
+                raw = (app.config.get("VIDEO_1_URL") or "").strip()
+                if raw:
+                    drive_id = extract_drive_file_id(raw)
+                    if drive_id:
+                        return drive_direct_download_candidates(drive_id)
+                    return [raw]
+
+            return []
+
+        def resolve_video(video_base: str) -> str:
+            urls = resolve_video_urls(video_base)
+            return urls[0] if urls else ""
+
         return {
             "SITE_NAME": app.config["SITE_NAME"],
             "BRAND": app.config["BRAND"],
@@ -391,7 +510,11 @@ def create_app() -> Flask:
             "FACEBOOK_HANDLE": app.config.get("FACEBOOK_HANDLE", ""),
             "STATIC_VERSION": app.config["STATIC_VERSION"],
             "CURRENT_YEAR": datetime.utcnow().year,
-            "video_url": resolve_static_video,
+            "video_url": resolve_video,
+            "video_urls": resolve_video_urls,
+
+            # Public R2 showcase clips (homepage + /filmy)
+            "R2_SHOWCASE": build_r2_showcase(),
 
         }
     @app.get("/")
@@ -457,7 +580,7 @@ def create_app() -> Flask:
 
     @app.get("/filmy")
     def filmy():
-        return render_template("filmy.html")
+        return render_template("filmy.html", filmy_showcase=build_r2_showcase())
 
     @app.get("/produkt/<slug>")
     def product_detail(slug: str):

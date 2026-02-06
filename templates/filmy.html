@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 
+{% block showcase_data %}
+  <script>
+    // Override showcase clips for the /filmy page
+    window.STATIC_VERSION = {{ STATIC_VERSION|tojson }};
+    window.X_SHOWCASE = {{ (filmy_showcase or [])|tojson }};
+  </script>
+{% endblock %}
+
+
 {% block title %}Filmy — X‑Estetik{% endblock %}
 
 {% block content %}
