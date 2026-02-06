@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% set title = "X‑Estetik — technologie kosmetyczne dla gabinetów" %}
+{% set HAS_HERO = true %}
+{% set body_class = "has-hero" %}
+
+{% block content %}
+<!-- HERO -->
+<section id="hero" class="hero">
+  <video id="heroVideo" class="hero-video" autoplay loop muted playsinline preload="metadata" poster="{{ url_for('static', filename='img/hero_poster.jpg') }}">
+    <source src="{{ video_url('video 1') }}?v={{ STATIC_VERSION }}">
+  </video>
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <h1 class="hero-title hero-title--long">Nowoczesne technologie kosmetyczne dla gabinetów, które chcą realnych efektów</h1>
+      <p class="hero-lead">
+        Dystrybucja, doradztwo i wdrożenia urządzeń beauty opartych na sprawdzonych technologiach. Bez obietnic bez pokrycia.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#kontakt" class="btn-primary">Umów prezentację / demo</a>
+        <a href="#produkty" class="btn-ghost">Zobacz technologie</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DLACZEGO X-ESTETIK -->
+<section class="paper-section" id="dlaczego">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-20 md:py-28">
+    <div class="grid gap-10 md:grid-cols-2 md:gap-16 items-start">
+      <div>
+        <div class="section-kicker">DLACZEGO X‑ESTETIK</div>
+        <h2 class="section-title mt-4">
+          <span class="sr-only">Dlaczego gabinety wybierają X‑Estetik</span>
+          <span class="js-typeonce type-caret" data-text="Dlaczego gabinety wybierają X‑Estetik" data-speed="22" aria-hidden="true"></span>
+        </h2>
+      </div>
+
+      <div class="prose-muted">
+        <p>
+          Specjalizujemy się w technologiach kosmetycznych, które znamy w praktyce — nie tylko z katalogów producentów.
+          Pomagamy dobrać urządzenie do realnych potrzeb gabinetu, a nie do chwilowej mody.
+        </p>
+
+        <ul class="mt-6 space-y-2 list-disc pl-5">
+          <li>selektywny dobór technologii</li>
+          <li>realne doradztwo, nie „sprzedaż na siłę”</li>
+          <li>szkolenie i wsparcie po zakupie</li>
+          <li>podejście długoterminowe, nie jednorazowa transakcja</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- Filmy / Showcase (as before) -->
+  <section class="paper-section" id="filmy">
+    <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-16 md:py-20">
+      <div class="section-kicker">FILMY</div>
+      <h2 class="section-title mt-4">Zobacz prezentacje i materiały</h2>
+      <p class="section-subtitle mt-3 max-w-2xl text-slate-600">
+        Strzałki i paski poniżej pozwalają szybko przełączać przykładowe wideo.
+      </p>
+
+      <div class="showcase-wrap mt-10">
+        <div id="showcase" class="showcase">
+        <div class="showcase-media relative">
+          <video id="showcaseVideo" class="showcase-video" playsinline muted autoplay loop preload="metadata"></video>
+
+          <button id="showcaseSoundBtn"
+                  class="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/40 px-3 py-2 text-sm text-white backdrop-blur">
+            <span id="showcaseSoundIcon" aria-hidden="true">🔇</span>
+            <span id="showcaseSoundText">Włącz dźwięk</span>
+          </button>
+        </div>
+
+        <div class="showcase-meta">
+          <div class="min-w-0">
+            <div id="showcaseTitle" class="showcase-quote">video 1</div>
+            <div id="showcaseDesc" class="showcase-sub">&nbsp;</div>
+          </div>
+
+          <div class="showcase-controls">
+            <button id="showcasePrev" class="circle-btn" aria-label="Poprzedni klip">‹</button>
+            <button id="showcaseNext" class="circle-btn" aria-label="Następny klip">›</button>
+          </div>
+        </div>
+
+          <div id="showcaseProgress" class="showcase-tabs" aria-label="Paski postępu"></div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <a class="btn-ghost" href="{{ url_for('filmy') }}">Filmy — zobacz wszystkie</a>
+      </div>
+    </div>
+  </section>
+
+
+<!-- TECHNOLOGIE / URZĄDZENIA -->
+<section class="vanilla-section vanilla-section--pale" id="produkty">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-20 md:py-28">
+    <div class="text-center max-w-[860px] mx-auto">
+      <div class="section-kicker">TECHNOLOGIE</div>
+      <h2 class="section-title mt-3">Technologie dostępne w ofercie</h2>
+
+      <div class="mt-10 flex flex-wrap justify-center gap-3 pill-row">
+        <a href="#produkty-lasery" class="pill-link">Lasery</a>
+        <a href="#produkty-hi-tech" class="pill-link">Urządzenia Hi‑Tech</a>
+        <a href="#produkty-akcesoria" class="pill-link">Akcesoria</a>
+        <a href="{{ url_for('catalog_download') }}" class="pill-link">Pobierz katalog PDF</a>
+      </div>
+    </div>
+
+    <div class="mt-14 space-y-16">
+      <!-- LASERY -->
+      <div id="produkty-lasery" class="product-group">
+        <div class="product-group-head">
+          <div class="product-group-kicker">LASERY</div>
+          <h3 class="product-group-title">Lasery</h3>
+        </div>
+
+        <div class="product-grid mt-10">
+          {% for p in lasers_products %}
+            <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card product-card--tall" style="--bg:url('{{ p.thumb }}');" {% if p.photo_base %}data-bg-photo-base="{{ p.photo_base }}"{% endif %}>
+              <div class="product-media" aria-hidden="true"></div>
+              <div class="product-overlay" aria-hidden="true"></div>
+              <div class="product-body">
+                <div class="product-title product-title--hero">{{ p.name }}</div>
+
+                <div class="product-bottom">
+                  <div class="product-price">
+                    {% if p.price %}<div class="price-main">{{ p.price }}</div>{% endif %}
+                    {% if p.rental %}<div class="price-sub">Raty od {{ p.rental }}/m‑c</div>{% endif %}
+                  </div>
+
+                  <div class="product-cta product-cta--ghost">Zobacz <span aria-hidden="true">↗</span></div>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- HI-TECH -->
+      <div id="produkty-hi-tech" class="product-group">
+        <div class="product-group-head">
+          <div class="product-group-kicker">HI‑TECH</div>
+          <h3 class="product-group-title">Urządzenia Hi‑Tech</h3>
+        </div>
+
+        <div class="product-grid mt-10">
+          {% for p in hi_tech_products %}
+            <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card product-card--tall" style="--bg:url('{{ p.thumb }}');" {% if p.photo_base %}data-bg-photo-base="{{ p.photo_base }}"{% endif %}>
+              <div class="product-media" aria-hidden="true"></div>
+              <div class="product-overlay" aria-hidden="true"></div>
+              <div class="product-body">
+                <div class="product-title product-title--hero">{{ p.name }}</div>
+
+                <div class="product-bottom">
+                  <div class="product-price">
+                    {% if p.price %}<div class="price-main">{{ p.price }}</div>{% endif %}
+                    {% if p.rental %}<div class="price-sub">Raty od {{ p.rental }}/m‑c</div>{% endif %}
+                  </div>
+
+                  <div class="product-cta product-cta--ghost">Zobacz <span aria-hidden="true">↗</span></div>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- AKCESORIA -->
+      <div id="produkty-akcesoria" class="product-group">
+        <div class="product-group-head">
+          <div class="product-group-kicker">AKCESORIA</div>
+          <h3 class="product-group-title">Akcesoria i urządzenia dodatkowe</h3>
+        </div>
+
+        <div class="product-grid mt-10">
+          {% for p in accessories_products %}
+            <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card product-card--tall" style="--bg:url('{{ p.thumb }}');" {% if p.photo_base %}data-bg-photo-base="{{ p.photo_base }}"{% endif %}>
+              <div class="product-media" aria-hidden="true"></div>
+              <div class="product-overlay" aria-hidden="true"></div>
+              <div class="product-body">
+                <div class="product-title product-title--hero">{{ p.name }}</div>
+
+                <div class="product-bottom">
+                  <div class="product-price">
+                    {% if p.price %}<div class="price-main">{{ p.price }}</div>{% endif %}
+                    {% if p.rental %}<div class="price-sub">Raty od {{ p.rental }}/m‑c</div>{% endif %}
+                  </div>
+
+                  <div class="product-cta product-cta--ghost">Zobacz <span aria-hidden="true">↗</span></div>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JAK WYGLĄDA WSPÓŁPRACA -->
+<section class="paper-section pt-0" id="wspolpraca">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 pb-24 md:pb-32">
+    <div class="text-center max-w-[760px] mx-auto">
+      <div class="section-kicker">WSPÓŁPRACA</div>
+      <h2 class="section-title mt-3">Jak wygląda współpraca z X‑Estetik</h2>
+    </div>
+
+    <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="info-card">
+        <div class="text-xs uppercase tracking-widest text-slate-500">Krok 1</div>
+        <div class="mt-3 font-semibold text-slate-900">Kontakt i rozmowa o potrzebach gabinetu</div>
+      </div>
+      <div class="info-card">
+        <div class="text-xs uppercase tracking-widest text-slate-500">Krok 2</div>
+        <div class="mt-3 font-semibold text-slate-900">Prezentacja technologii</div>
+      </div>
+      <div class="info-card">
+        <div class="text-xs uppercase tracking-widest text-slate-500">Krok 3</div>
+        <div class="mt-3 font-semibold text-slate-900">Dopasowanie urządzenia i warunków</div>
+      </div>
+      <div class="info-card">
+        <div class="text-xs uppercase tracking-widest text-slate-500">Krok 4</div>
+        <div class="mt-3 font-semibold text-slate-900">Szkolenie oraz wsparcie po wdrożeniu</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OPINIE -->
+<section class="paper-section pt-0" id="opinie">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 pb-24 md:pb-32">
+    <div class="flex items-end justify-between gap-6">
+      <div>
+        <div class="section-kicker">OPINIE</div>
+        <h2 class="section-title mt-2">Opinie</h2>
+      </div>
+      <a href="{{ url_for('reviews') }}" class="pill-link hidden md:inline-flex">Zobacz wszystkie</a>
+    </div>
+
+    <div class="mt-10 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+      {% for r in home_reviews %}
+        <div class="review-card">
+          <div class="review-text">„{{ r.text|truncate(120, True, '…') }}”</div>
+          <div class="review-author">{{ r.author }}</div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-8 md:hidden">
+      <a href="{{ url_for('reviews') }}" class="pill-link">Zobacz wszystkie opinie</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA KOŃCOWE / KONTAKT + QR -->
+<section class="paper-section pt-0" id="kontakt">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 pb-24 md:pb-32">
+    <div class="grid gap-10 md:grid-cols-2 md:gap-16 items-stretch">
+      <div class="contact-panel">
+        <div class="section-kicker">KONTAKT</div>
+        <h2 class="section-title mt-2">Porozmawiajmy o technologii dla Twojego gabinetu</h2>
+        <p class="mt-4 prose-muted">Każdy gabinet jest inny. Dlatego zaczynamy od rozmowy, nie od cennika.</p>
+
+        {% if CONTACT_EMAIL %}
+          <div class="mt-4 text-sm text-slate-700">
+            E‑mail: <a class="underline" href="mailto:{{ CONTACT_EMAIL }}">{{ CONTACT_EMAIL }}</a>
+          </div>
+        {% endif %}
+
+        <form method="post" action="{{ url_for('lead') }}" class="contact-form mt-8">
+          <div class="grid gap-3">
+            <input name="name" placeholder="Imię i nazwisko" class="input" required>
+            <input name="phone" placeholder="Telefon" class="input">
+            <input name="email" placeholder="E‑mail" class="input" required>
+            <textarea name="message" placeholder="Wiadomość" rows="5" class="input" required></textarea>
+            <button class="btn-primary w-fit" type="submit">Umów prezentację / kontakt</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="qr-panel">
+        <div class="qr-title">Kody QR</div>
+        <div class="qr-grid">
+          <div class="qr-item">
+            <img src="{{ url_for('static', filename='img/qr/instagram.png') }}" alt="QR Instagram" loading="lazy" class="qr-img">
+            <div class="qr-label">Instagram</div>
+          </div>
+          <div class="qr-item">
+            <img src="{{ url_for('static', filename='img/qr/facebook.png') }}" alt="QR Facebook" loading="lazy" class="qr-img">
+            <div class="qr-label">Facebook</div>
+          </div>
+        </div>
+        <div class="qr-bottom">
+          <a href="{{ url_for('social') }}" class="pill-link">Więcej w „Media społecznościowe”</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

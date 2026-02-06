@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% set title = "O nas — X‑Estetik" %}
+
+{% block content %}
+<section class="paper-section">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-20 md:py-28">
+    <div class="grid gap-10 md:grid-cols-2 md:gap-16 items-start">
+      <h1 class="display-title">O nas</h1>
+
+      <div class="prose-muted">
+        {% for para in about_text.split('\n\n') %}
+        <p>{{ para }}</p>
+        {% endfor %}
+        <p class="mt-6">
+          Dostarczamy technologie i materiały sprzedażowe — tak, aby prezentacja była prosta, szybka i spójna.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-14 grid gap-6 md:grid-cols-3">
+      <div class="info-card">
+        <div class="info-kicker">Podejście</div>
+        <div class="info-title">Dobór technologii pod wynik</div>
+        <p class="info-text">Pomagamy dobrać urządzenia tak, aby realnie zwiększały ofertę gabinetu i ROI.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-kicker">Materiały</div>
+        <div class="info-title">Karty + katalog</div>
+        <p class="info-text">Karty produktów oraz galerie stron  — gotowe do pokazania klientowi.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-kicker">Wsparcie</div>
+        <div class="info-title">Szybki kontakt</div>
+        <p class="info-text">Odpowiadamy w dni robocze i pomagamy w doborze rozwiązań pod potrzeby kliniki.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

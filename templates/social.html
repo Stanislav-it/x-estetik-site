@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set title = "Media społecznościowe — X‑Estetik" %}
+
+{% block content %}
+<section class="paper-section">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-20 md:py-28">
+    <div class="grid gap-10 md:grid-cols-2 md:gap-16 items-start">
+      <h1 class="display-title">Media społecznościowe</h1>
+      <div class="prose-muted">
+        <p>Linki do fanpage oraz kody QR gotowe do wydruku.</p>
+        <div class="mt-6 flex items-center gap-3">
+          <a href="{{ url_for('catalog_download') }}" class="pill-link">Pobierz katalog</a>
+          <a href="{{ url_for('index') }}#kontakt" class="pill-link">Kontakt</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-14 grid gap-6 md:grid-cols-2">
+      {% for s in socials %}
+        <div class="info-card">
+          <div class="flex items-start justify-between gap-5">
+            <div>
+              <div class="info-kicker">{{ s.label }}</div>
+              <div class="mt-2 text-2xl font-semibold tracking-tight">{{ s.handle }}</div>
+              <a class="mt-3 inline-flex text-sm underline text-slate-700 hover:text-slate-900" href="{{ s.url }}" target="_blank" rel="noreferrer">{{ s.url }}</a>
+            </div>
+
+            <div class="hidden sm:block">
+              <a href="{{ s.url }}" target="_blank" rel="noreferrer" class="pill-link">Otwórz ↗</a>
+            </div>
+          </div>
+
+          <div class="mt-6 qr-frame">
+            <img src="{{ s.qr }}" alt="QR — {{ s.label }}" class="w-56 h-56 object-contain">
+          </div>
+
+          <div class="mt-4 text-xs text-slate-500">
+            Plik QR: <span class="font-mono">{{ s.qr|replace(url_for('static', filename=''), '') }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

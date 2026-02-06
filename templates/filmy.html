@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Filmy — X‑Estetik{% endblock %}
+
+{% block content %}
+<section class="paper-section" id="filmy">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-16 md:py-20">
+    <div class="section-kicker">FILMY</div>
+    <h1 class="section-title mt-4">Filmy</h1>
+    <p class="section-subtitle mt-3 max-w-2xl text-slate-600">
+      Zobacz prezentacje i materiały. Strzałki i paski poniżej pozwalają szybko przełączać przykładowe wideo.
+    </p>
+
+    <div class="showcase-wrap mt-10">
+      <div id="showcase" class="showcase">
+      <div class="showcase-media relative">
+        <video id="showcaseVideo" class="showcase-video" playsinline muted autoplay loop preload="metadata"></video>
+
+        <button id="showcaseSoundBtn"
+                class="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-black/40 px-3 py-2 text-sm text-white backdrop-blur">
+          <span id="showcaseSoundIcon" aria-hidden="true">🔇</span>
+          <span id="showcaseSoundText">Włącz dźwięk</span>
+        </button>
+      </div>
+
+      <div class="showcase-meta">
+        <div class="min-w-0">
+          <div id="showcaseTitle" class="showcase-quote">video 1</div>
+          <div id="showcaseDesc" class="showcase-sub">&nbsp;</div>
+        </div>
+
+        <div class="showcase-controls">
+          <button id="showcasePrev" class="circle-btn" aria-label="Poprzedni klip">‹</button>
+          <button id="showcaseNext" class="circle-btn" aria-label="Następny klip">›</button>
+        </div>
+      </div>
+
+        <div id="showcaseProgress" class="showcase-tabs" aria-label="Paski postępu"></div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

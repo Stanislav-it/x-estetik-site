@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% set title = "404 — X‑Estetik" %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 pt-16 pb-20">
+  <div class="rounded-3xl border border-slate-100 p-10 shadow-soft bg-white text-center">
+    <div class="text-sm uppercase tracking-wide text-slate-500">Błąd 404</div>
+    <h1 class="mt-3 text-3xl font-semibold tracking-tight">Nie znaleziono strony</h1>
+    <p class="mt-3 text-slate-600">Link jest nieprawidłowy lub strona została przeniesiona.</p>
+    <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="{{ url_for('index') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">Strona główna</a>
+      <a href="{{ url_for('lasers') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-2xl border border-slate-300 text-slate-900 hover:bg-slate-50">Lasery</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

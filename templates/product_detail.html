@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% set title = product.name ~ " — X‑Estetik" %}
+
+{% block content %}
+<section class="paper-section">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-16 md:py-20">
+    <div class="text-sm text-slate-600 flex flex-wrap items-center gap-2">
+      <a class="underline" href="{{ url_for('index') }}">Strona główna</a>
+      <span>•</span>
+      <a class="underline" href="{{ product.back_url }}">{{ product.back_label }}</a>
+      <span>•</span>
+      <span class="text-slate-900">{{ product.name }}</span>
+    </div>
+
+    <div class="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-14 items-start">
+      <div class="rounded-none sm:rounded-[28px] overflow-hidden border border-black/10 bg-white/70 backdrop-blur">
+        <img src="{{ product.hero }}" alt="{{ product.name }}" class="w-full aspect-[4/3] object-cover" {% if product.photo_base %}data-photo-base="{{ product.photo_base }}"{% endif %}>
+      </div>
+
+      <div>
+        <div class="inline-flex items-center rounded-full border border-black/10 bg-white/70 backdrop-blur px-3 py-1 text-xs text-slate-700">
+          {{ product.tag }}
+        </div>
+
+        <h1 class="mt-4 text-3xl md:text-4xl font-semibold tracking-tight">{{ product.name }}</h1>
+
+        {% if product.short %}
+          <p class="mt-5 text-slate-700 leading-relaxed">{{ product.short }}</p>
+        {% endif %}
+
+        <div class="mt-8 grid gap-5 sm:grid-cols-2">
+          <div class="info-card">
+            <div class="info-kicker">Cena</div>
+            <div class="mt-2 text-lg font-semibold">{{ product.price or "—" }}</div>
+            {% if product.rental %}<div class="mt-1 text-sm text-slate-600">Wynajem: od {{ product.rental }}/mies.</div>{% endif %}
+          </div>
+
+          <div class="info-card">
+            <div class="info-kicker">Materiały</div>
+            <div class="mt-2 text-sm text-slate-700">
+              Karta zawiera galerię stron katalogowych (PDF → obrazy).
+            </div>
+            <a href="{{ url_for('catalog_download') }}" class="mt-3 inline-flex text-sm underline text-slate-700 hover:text-slate-900">Pobierz katalog</a>
+          </div>
+        </div>
+
+        {% if product.bullets %}
+          <div class="mt-10">
+            <div class="text-xs uppercase tracking-wide text-slate-500">Najważniejsze</div>
+            <ul class="mt-4 space-y-3 text-slate-800">
+              {% for b in product.bullets %}
+                <li class="flex gap-3">
+                  <span class="mt-2 h-2 w-2 rounded-full bg-slate-900 flex-none"></span>
+                  <span>{{ b }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <div class="mt-10 flex flex-col sm:flex-row gap-3">
+          <a href="{{ url_for('index') }}#kontakt" class="btn-primary w-fit">Zapytaj o urządzenie</a>
+          <a href="{{ product.back_url }}" class="btn-ghost w-fit">Wróć do listy</a>
+        </div>
+      </div>
+    </div>
+
+    {% if product.gallery %}
+      <div class="mt-16">
+        <div class="flex items-end justify-between gap-6">
+          <div>
+            <h2 class="text-2xl font-semibold tracking-tight">Materiały</h2>
+            <p class="mt-2 text-slate-600">Kliknij stronę, aby powiększyć.</p>
+          </div>
+          <div class="text-sm text-slate-500">{{ product.gallery|length }} stron</div>
+        </div>
+
+        {# Full-width, single-column pages (no frames / no thumbnails) #}
+        <div class="mt-6 full-bleed">
+          <div class="materials-pages">
+            {% for img in product.gallery %}
+              <a href="{{ img }}" class="materials-page" data-lightbox>
+                <img src="{{ img }}" alt="{{ product.name }} — strona {{ loop.index }}" loading="lazy">
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

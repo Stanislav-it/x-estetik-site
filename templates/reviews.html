@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% set title = "Opinie klientów — X‑Estetik" %}
+
+{% block content %}
+<section class="paper-section">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-20 md:py-28">
+    <div class="flex items-end justify-between gap-6 flex-wrap">
+      <h1 class="display-title">Opinie klientów</h1>
+    </div>
+
+    <div class="mt-14 grid gap-6 md:grid-cols-3">
+
+      {% for r in reviews %}
+        <div class="review-card">
+          <div class="text-xs uppercase tracking-wide text-slate-500">{{ r.source }}</div>
+          <div class="mt-3 text-slate-900 font-semibold">{{ r.title }}</div>
+          <p class="mt-3 text-slate-700 leading-relaxed">{{ r.text }}</p>
+          <div class="mt-4 text-sm text-slate-600">— {{ r.author }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
