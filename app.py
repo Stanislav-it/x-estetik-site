@@ -3,7 +3,10 @@ from __future__ import annotations
 import os
 import re
 import sqlite3
+<<<<<<< HEAD
 from html import escape as html_escape
+=======
+>>>>>>> bec9881 (Update video 1 to smaller size)
 from urllib.parse import quote
 from dataclasses import dataclass
 from datetime import datetime

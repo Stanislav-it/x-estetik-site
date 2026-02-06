@@ -7,7 +7,11 @@
 <!-- HERO -->
 <section id="hero" class="hero">
   {% set hero_srcs = video_urls('video 1') %}
+<<<<<<< HEAD
   <video id="heroVideo" class="hero-video" autoplay loop muted playsinline preload="auto" poster="{{ url_for('static', filename='img/poster-black.png') }}">
+=======
+  <video id="heroVideo" class="hero-video" autoplay loop muted playsinline preload="metadata" poster="{{ url_for('static', filename='img/hero_poster.jpg') }}">
+>>>>>>> bec9881 (Update video 1 to smaller size)
     {% for src in (hero_srcs or []) %}
       {% if src.startswith('http') %}
         <source src="{{ src }}">
