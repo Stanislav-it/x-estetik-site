@@ -328,6 +328,30 @@ PRODUCTS: List[Product] = [
 
 PRODUCTS_BY_SLUG: Dict[str, Product] = {p.slug: p for p in PRODUCTS}
 
+# Order of products on the homepage (manual business order).
+# Any products not listed here fall back to alphabetical order after listed items.
+HOME_PAGE_ORDER: List[str] = [
+    "x-levage-erbo",
+    "x-levage",
+    "x-fraxel-premium",
+    "x-fraxel",
+    "depimax",
+    "x-hair",
+    "x-boss",
+    "x-v980",
+    "regen-lift",
+    "x-contour-krio",
+    "x-shape",
+    "ems-formax",
+    "estetik-frax",
+    "lumera-estetik",
+    "x-derma",
+    "x-blue-pen",
+    "biopen-q2",
+]
+
+HOME_PAGE_ORDER_MAP: Dict[str, int] = {slug: i for i, slug in enumerate(HOME_PAGE_ORDER)}
+
 
 CATEGORY_META = {
     "lasers": {
@@ -530,11 +554,13 @@ def create_app() -> Flask:
     def index():
         # Homepage blocks
         home_reviews = sample_reviews()[:6]
+        def home_sort_key(p: Product):
+            # Sort by the explicit homepage order first; then fall back to name.
+            return (HOME_PAGE_ORDER_MAP.get(p.slug, 10**9), p.name.lower())
 
-        lasers_all = sorted([p for p in PRODUCTS if p.category == "lasers"], key=lambda p: p.name.lower())
-        hi_tech_all = sorted([p for p in PRODUCTS if p.category == "hi-tech"], key=lambda p: p.name.lower())
-        accessories_all = sorted([p for p in PRODUCTS if p.category == "accessories"], key=lambda p: p.name.lower())
-
+        lasers_all = sorted([p for p in PRODUCTS if p.category == "lasers"], key=home_sort_key)
+        hi_tech_all = sorted([p for p in PRODUCTS if p.category == "hi-tech"], key=home_sort_key)
+        accessories_all = sorted([p for p in PRODUCTS if p.category == "accessories"], key=home_sort_key)
         return render_template(
             "index.html",
             lasers_products=[to_view(p) for p in lasers_all],

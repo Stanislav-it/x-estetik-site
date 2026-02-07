@@ -27,15 +27,15 @@
       <nav class="site-nav" aria-label="Główne">
         <a class="site-nav-link" href="{{ url_for('about') }}">O nas</a>
         <a class="site-nav-link" href="{{ url_for('finansowanie') }}">Finansowanie</a>
-        <a class="site-nav-link" href="{{ url_for('gielda') }}" title="Giełda Sprzętu Kosmetycznego" aria-label="Giełda Sprzętu Kosmetycznego">Giełda</a>
+        <a class="site-nav-link" href="{{ url_for('gielda') }}" title="Giełda Sprzętu Kosmetycznego">Giełda</a>
         <a class="site-nav-link" href="{{ url_for('lasers') }}">Lasery</a>
-        <a class="site-nav-link" href="{{ url_for('hi_tech') }}" title="Urządzenia Hi‑Tech" aria-label="Urządzenia Hi‑Tech">Hi‑Tech</a>
+        <a class="site-nav-link" href="{{ url_for('hi_tech') }}" title="Urządzenia Hi‑Tech">Hi‑Tech</a>
         {% if HAS_ACCESSORIES %}
         <a class="site-nav-link" href="{{ url_for('accessories') }}">Akcesoria</a>
         {% endif %}
         <a class="site-nav-link" href="{{ url_for('reviews') }}">Opinie</a>
         <a class="site-nav-link" href="{{ url_for('filmy') }}">Filmy</a>
-        <a class="site-nav-link" href="{{ url_for('social') }}" title="Media społecznościowe" aria-label="Media społecznościowe">Media</a>
+        <a class="site-nav-link" href="{{ url_for('social') }}" title="Media społecznościowe">Media</a>
         <a class="site-nav-link" href="{{ url_for('index') }}#kontakt">Kontakt</a>
       </nav>
 

@@ -449,18 +449,18 @@ img, video { max-width: 100%; height: auto; }
 @media (min-width: 900px){
   .site-nav{ display:flex; }
 }
-@media (max-width: 1200px){
-  .site-nav{ gap: 12px; font-size: 13px; }
-  .site-cta{ font-size: 13px; padding: 9px 12px; }
+
+/* Tighten header nav on smaller desktops */
+@media (max-width: 1200px) and (min-width: 900px){
+  .site-nav{ gap: 14px; font-size: 13px; }
+  .site-cta{ padding: 9px 12px; font-size: 13px; }
 }
 .site-nav-link{
   text-decoration:none;
   opacity: .82;
   transition: opacity .15s ease;
-
   white-space: nowrap;
 }
-
 .site-nav-link:hover{ opacity: 1; }
 
 .site-actions{ display:flex; align-items:center; gap:10px; }
