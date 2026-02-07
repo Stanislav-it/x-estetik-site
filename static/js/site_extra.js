@@ -375,4 +375,27 @@
 })();
 
 
+(function () {
+  // ---------------- Hero: avoid showing a low-quality poster flash ----------------
+  const v = document.getElementById('heroVideo');
+  if (!v) return;
+
+  const markReady = () => v.classList.add('is-ready');
+
+  // If the browser already has enough data, reveal immediately.
+  if (v.readyState >= 2) {
+    markReady();
+    return;
+  }
+
+  v.addEventListener('loadeddata', markReady, { once: true });
+  v.addEventListener('playing', markReady, { once: true });
+
+  // Fallback: if autoplay is blocked / slow, still show something after a moment.
+  setTimeout(() => {
+    if (!v.classList.contains('is-ready')) markReady();
+  }, 1800);
+})();
+
+
 ;

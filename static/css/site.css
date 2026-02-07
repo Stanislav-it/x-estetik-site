@@ -646,6 +646,7 @@ img, video { max-width: 100%; height: auto; }
   /* Fill the first viewport on desktop like the reference */
   min-height: 100svh;
   height: 100svh;
+  background: #000; /* avoid low-quality poster flash before the video paints */
   overflow: hidden;
   display:flex;
   align-items:flex-end;
@@ -662,7 +663,11 @@ img, video { max-width: 100%; height: auto; }
   object-position: center;
   background: #000;
   transform: none;
+  opacity: 0;
+  transition: opacity .35s ease;
 }
+
+.hero-video.is-ready{ opacity: 1; }
 .hero-overlay{
   position:absolute;
   inset:0;

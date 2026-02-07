@@ -14,7 +14,8 @@
 
     <div class="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-14 items-start">
       <div class="rounded-none sm:rounded-[28px] overflow-hidden border border-black/10 bg-white/70 backdrop-blur">
-        <img src="{{ product.hero }}" alt="{{ product.name }}" class="w-full aspect-[4/3] object-cover" {% if product.photo_base %}data-photo-base="{{ product.photo_base }}"{% endif %}>
+        {# Keep the whole device visible (like on listing cards) #}
+        <img src="{{ product.hero }}" alt="{{ product.name }}" class="w-full aspect-[4/3] object-contain p-3 sm:p-5" {% if product.photo_base %}data-photo-base="{{ product.photo_base }}"{% endif %}>
       </div>
 
       <div>

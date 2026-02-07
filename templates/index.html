@@ -7,7 +7,7 @@
 <!-- HERO -->
 <section id="hero" class="hero">
   {% set hero_srcs = video_urls('video 1') %}
-  <video id="heroVideo" class="hero-video" autoplay loop muted playsinline preload="metadata" poster="{{ url_for('static', filename='img/hero_poster.jpg') }}">
+  <video id="heroVideo" class="hero-video" autoplay loop muted playsinline preload="auto">
     {% for src in (hero_srcs or []) %}
       {% if src.startswith('http') %}
         <source src="{{ src }}">
