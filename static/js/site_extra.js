@@ -342,6 +342,31 @@
   }
 })();
 
+(function () {
+  // ---------------- Cookie notice (localStorage) ----------------
+  const banner = document.getElementById('cookieBanner');
+  const btn = document.getElementById('cookieAccept');
+  if (!banner || !btn) return;
+
+  const KEY = 'xestetik_cookie_consent_v1';
+  try {
+    if (window.localStorage && localStorage.getItem(KEY) === '1') return;
+  } catch (e) {
+    // If storage is blocked, just show the banner.
+  }
+
+  banner.classList.remove('hidden');
+
+  btn.addEventListener('click', () => {
+    try {
+      if (window.localStorage) localStorage.setItem(KEY, '1');
+    } catch (e) {
+      // ignore
+    }
+    banner.classList.add('hidden');
+  });
+})();
+
 
 (function () {
   // ---------------- Hero (single clip + sound toggle) ----------------

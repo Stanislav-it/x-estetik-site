@@ -26,13 +26,13 @@
 
       <nav class="site-nav" aria-label="Główne">
         <a class="site-nav-link" href="{{ url_for('about') }}">O nas</a>
-        <a class="site-nav-link" href="{{ url_for('finansowanie') }}">Finansowanie</a>
-        <a class="site-nav-link" href="{{ url_for('gielda') }}" title="Giełda Sprzętu Kosmetycznego">Giełda</a>
         <a class="site-nav-link" href="{{ url_for('lasers') }}">Lasery</a>
-        <a class="site-nav-link" href="{{ url_for('hi_tech') }}" title="Urządzenia Hi‑Tech">Hi‑Tech</a>
+        <a class="site-nav-link" href="{{ url_for('hi_tech') }}" title="Urządzenia Hi‑Tech">Urządzenia</a>
         {% if HAS_ACCESSORIES %}
         <a class="site-nav-link" href="{{ url_for('accessories') }}">Akcesoria</a>
         {% endif %}
+        <a class="site-nav-link" href="{{ url_for('gielda') }}" title="Giełda Sprzętu Kosmetycznego">Giełda</a>
+        <a class="site-nav-link" href="{{ url_for('finansowanie') }}">Finansowanie</a>
         <a class="site-nav-link" href="{{ url_for('reviews') }}">Opinie</a>
         <a class="site-nav-link" href="{{ url_for('filmy') }}">Filmy</a>
         <a class="site-nav-link" href="{{ url_for('social') }}" title="Media społecznościowe">Media</a>
@@ -135,7 +135,34 @@
         </div>
       </div>
     </div>
+
+    <div class="border-t border-black/10">
+      <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-xs text-slate-600">
+        <div>© {{ CURRENT_YEAR }} {{ SITE_NAME }}. Wszelkie prawa zastrzeżone.</div>
+        <div class="flex flex-wrap gap-x-4 gap-y-2">
+          <a class="underline hover:text-slate-900" href="{{ url_for('policy', slug='privacy') }}">Polityka prywatności</a>
+          <a class="underline hover:text-slate-900" href="{{ url_for('policy', slug='cookies') }}">Polityka cookies</a>
+          <a class="underline hover:text-slate-900" href="{{ url_for('policy', slug='terms') }}">Regulamin serwisu</a>
+          <a class="underline hover:text-slate-900" href="{{ url_for('policy', slug='disclaimer') }}">Zastrzeżenia</a>
+        </div>
+      </div>
+    </div>
   </footer>
+
+  <!-- Cookie notice (minimal, non-blocking; stores acceptance in localStorage) -->
+  <div id="cookieBanner" class="fixed inset-x-0 bottom-0 z-[99999] hidden">
+    <div class="mx-auto max-w-[1180px] px-5 md:px-8 pb-5">
+      <div class="rounded-2xl border border-black/10 bg-white/95 backdrop-blur shadow-soft p-4 md:p-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div class="text-xs md:text-sm text-slate-700 leading-relaxed">
+          Ta strona korzysta z plików cookies niezbędnych do działania serwisu. Więcej informacji: <a class="underline" href="{{ url_for('policy', slug='cookies') }}">Polityka cookies</a>.
+        </div>
+        <div class="flex items-center gap-3">
+          <button id="cookieAccept" class="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-xs md:text-sm bg-slate-900 text-white hover:bg-slate-800">Akceptuję</button>
+          <a class="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-xs md:text-sm border border-black/10 hover:bg-black/5" href="{{ url_for('policy', slug='privacy') }}">Polityka prywatności</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   {% block scripts %}{% endblock %}
 
@@ -175,13 +202,13 @@
 
       <nav class="mm-nav" aria-label="Menu">
         <a class="mm-item" href="{{ url_for('about') }}">O nas</a>
-        <a class="mm-item" href="{{ url_for('finansowanie') }}">Finansowanie</a>
-        <a class="mm-item" href="{{ url_for('gielda') }}">Giełda Sprzętu Kosmetycznego</a>
         <a class="mm-item" href="{{ url_for('lasers') }}">Lasery</a>
         <a class="mm-item" href="{{ url_for('hi_tech') }}">Urządzenia Hi‑Tech</a>
         {% if HAS_ACCESSORIES %}
         <a class="mm-item" href="{{ url_for('accessories') }}">Akcesoria</a>
         {% endif %}
+        <a class="mm-item" href="{{ url_for('gielda') }}">Giełda Sprzętu Kosmetycznego</a>
+        <a class="mm-item" href="{{ url_for('finansowanie') }}">Finansowanie</a>
         <a class="mm-item" href="{{ url_for('reviews') }}">Opinie</a>
         <a class="mm-item" href="{{ url_for('filmy') }}">Filmy</a>
         <a class="mm-item" href="{{ url_for('social') }}">Media społecznościowe</a>

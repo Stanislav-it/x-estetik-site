@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import re
 import sqlite3
+from html import escape as html_escape
 from urllib.parse import quote
 from dataclasses import dataclass
 from datetime import datetime
@@ -676,9 +677,14 @@ def create_app() -> Flask:
         email = (request.form.get("email") or "").strip()
         phone = (request.form.get("phone") or "").strip()
         message = (request.form.get("message") or "").strip()
+        privacy_accept = (request.form.get("privacy_accept") or "").strip() == "1"
 
         if not name or not email or not message:
             flash("Uzupełnij wymagane pola: imię, e‑mail oraz wiadomość.", "error")
+            return redirect(request.referrer or url_for("index") + "#kontakt")
+
+        if not privacy_accept:
+            flash("Zaznacz zgodę na Politykę prywatności, aby wysłać formularz.", "error")
             return redirect(request.referrer or url_for("index") + "#kontakt")
 
         save_lead(app, name=name, email=email, phone=phone, message=message, path=(request.referrer or ""))
@@ -687,7 +693,7 @@ def create_app() -> Flask:
 
     @app.get("/polityki/<slug>")
     def policy(slug: str):
-        policies = policy_content()
+        policies = policy_content(app)
         if slug not in policies:
             abort(404)
         title, body = policies[slug]
@@ -961,34 +967,122 @@ def sample_reviews() -> List[Dict[str, str]]:
             "author": "Właściciel gabinetu",
         },
     ]
-def policy_content() -> Dict[str, tuple]:
+def policy_content(app: Flask) -> Dict[str, tuple]:
+    """Return HTML bodies for legal pages.
+
+    Notes:
+    - Content is intentionally practical and generic.
+    - Update firm data (adres/NIP) via env vars if needed.
+    """
+    site = html_escape(app.config.get("SITE_NAME", "X‑Estetik"))
+    email = html_escape(app.config.get("CONTACT_EMAIL", ""))
+    phone = html_escape(app.config.get("CONTACT_PHONE", ""))
+
+    admin_name = html_escape(get_env("LEGAL_ENTITY_NAME", site))
+    admin_address = html_escape(get_env("LEGAL_ENTITY_ADDRESS", ""))
+    admin_nip = html_escape(get_env("LEGAL_ENTITY_NIP", ""))
+
+    contact_lines = []
+    if email:
+        contact_lines.append(f"E‑mail: <a href=\"mailto:{email}\">{email}</a>")
+    if phone:
+        contact_lines.append(f"Telefon: <a href=\"tel:{phone.replace(' ', '')}\">{phone}</a>")
+    contact_html = "<br>".join(contact_lines) if contact_lines else ""
+
+    admin_block = f"<strong>{admin_name}</strong>" + (f"<br>{admin_address}" if admin_address else "") + (f"<br>NIP: {admin_nip}" if admin_nip else "")
+    if contact_html:
+        admin_block += f"<br>{contact_html}"
+
+    privacy = f"""
+    <p>Dokument określa zasady przetwarzania danych osobowych w serwisie <strong>{site}</strong> (dalej: „Serwis”).</p>
+
+    <h2>1. Administrator danych</h2>
+    <p>Administratorem danych osobowych jest:</p>
+    <p>{admin_block}</p>
+
+    <h2>2. Jakie dane przetwarzamy</h2>
+    <ul>
+      <li>dane przekazane w formularzu kontaktowym: imię i nazwisko, e‑mail, telefon (opcjonalnie), treść wiadomości,</li>
+      <li>dane techniczne: podstawowe logi serwera (np. adres IP, data i godzina zapytania, typ przeglądarki) — wyłącznie w celu bezpieczeństwa i diagnostyki.</li>
+    </ul>
+
+    <h2>3. Cele i podstawy prawne</h2>
+    <ul>
+      <li><strong>Kontakt i obsługa zapytań</strong> — udzielenie odpowiedzi, przygotowanie oferty, umówienie prezentacji (art. 6 ust. 1 lit. b RODO — działania przed zawarciem umowy / art. 6 ust. 1 lit. f RODO — uzasadniony interes Administratora).</li>
+      <li><strong>Zapewnienie bezpieczeństwa Serwisu</strong> — wykrywanie nadużyć, utrzymanie i diagnostyka (art. 6 ust. 1 lit. f RODO).</li>
+      <li><strong>Obrona lub dochodzenie roszczeń</strong> (art. 6 ust. 1 lit. f RODO).</li>
+    </ul>
+
+    <h2>4. Odbiorcy danych</h2>
+    <p>Dane mogą być udostępniane podmiotom wspierającym Administratora w utrzymaniu Serwisu (np. hosting/IT) wyłącznie na podstawie umów powierzenia i w zakresie niezbędnym do realizacji usług.</p>
+
+    <h2>5. Okres przechowywania</h2>
+    <ul>
+      <li>dane z formularza kontaktowego — przez okres niezbędny do obsługi zapytania, a następnie do czasu przedawnienia ewentualnych roszczeń,</li>
+      <li>logi techniczne — przez okres niezbędny do zapewnienia bezpieczeństwa i diagnostyki (zwykle do 90 dni, o ile nie zajdzie potrzeba dłuższego przechowywania w związku z incydentem).</li>
+    </ul>
+
+    <h2>6. Prawa osób, których dane dotyczą</h2>
+    <p>Masz prawo żądać: dostępu do danych, sprostowania, usunięcia, ograniczenia przetwarzania, przenoszenia danych oraz wniesienia sprzeciwu (w przypadkach przewidzianych prawem).</p>
+    <p>Jeśli uważasz, że przetwarzanie narusza przepisy, przysługuje Ci prawo wniesienia skargi do Prezesa UODO.</p>
+
+    <h2>7. Dobrowolność podania danych</h2>
+    <p>Podanie danych jest dobrowolne, ale niezbędne do udzielenia odpowiedzi na zapytanie (formularz kontaktowy).</p>
+
+    <h2>8. Zautomatyzowane podejmowanie decyzji</h2>
+    <p>Administrator nie podejmuje decyzji w sposób zautomatyzowany, w tym nie stosuje profilowania w rozumieniu RODO.</p>
+    """
+
+    cookies = f"""
+    <p>Niniejsza Polityka opisuje zasady wykorzystywania plików cookies w Serwisie <strong>{site}</strong>.</p>
+
+    <h2>1. Czym są pliki cookies</h2>
+    <p>Cookies to niewielkie pliki tekstowe zapisywane na urządzeniu użytkownika. Mogą być wykorzystywane m.in. do prawidłowego działania serwisu, utrzymania preferencji oraz statystyk.</p>
+
+    <h2>2. Jakich cookies używamy</h2>
+    <ul>
+      <li><strong>Niezbędne</strong> — wymagane do działania Serwisu i jego funkcji (np. mechanizmy bezpieczeństwa, pamięć ustawień).</li>
+      <li><strong>Funkcjonalne</strong> — poprawiają wygodę korzystania (np. zapamiętanie akceptacji komunikatu cookies w przeglądarce).</li>
+    </ul>
+
+    <p>Serwis nie wykorzystuje cookies marketingowych. Jeśli w przyszłości zostaną dodane narzędzia analityczne lub reklamowe, polityka zostanie zaktualizowana.</p>
+
+    <h2>3. Zarządzanie cookies</h2>
+    <p>Możesz zmienić ustawienia cookies w swojej przeglądarce (blokowanie, usuwanie). Ograniczenie cookies niezbędnych może wpłynąć na działanie Serwisu.</p>
+    """
+
+    terms = f"""
+    <p>Niniejszy regulamin określa zasady korzystania z Serwisu <strong>{site}</strong>.</p>
+
+    <h2>1. Charakter Serwisu</h2>
+    <p>Serwis ma charakter informacyjny i prezentacyjny. Nie stanowi sklepu internetowego ani platformy transakcyjnej.</p>
+
+    <h2>2. Prawa autorskie</h2>
+    <p>Wszelkie materiały udostępnione w Serwisie (teksty, grafiki, zdjęcia, układ) są chronione prawem autorskim. Zabronione jest ich kopiowanie i rozpowszechnianie bez zgody Administratora, z wyjątkiem dozwolonego użytku wynikającego z przepisów.</p>
+
+    <h2>3. Odpowiedzialność</h2>
+    <p>Administrator dokłada starań, aby informacje były aktualne, jednak nie gwarantuje ich kompletności. Parametry urządzeń, wskazania i protokoły należy zawsze weryfikować w dokumentacji oraz zgodnie z obowiązującymi przepisami.</p>
+
+    <h2>4. Kontakt</h2>
+    <p>W sprawach dotyczących Serwisu skontaktuj się z Administratorem: {contact_html if contact_html else "(dane kontaktowe w stopce)"}.</p>
+
+    <h2>5. Zmiany regulaminu</h2>
+    <p>Administrator może zaktualizować regulamin z ważnych powodów (np. zmiany prawne lub techniczne). Aktualna wersja jest zawsze dostępna w Serwisie.</p>
+    """
+
+    disclaimer = f"""
+    <p>Materiały w Serwisie <strong>{site}</strong> mają charakter informacyjny. Nie stanowią porady medycznej ani gwarancji efektów zabiegowych.</p>
+    <ul>
+      <li>Wskazania, przeciwwskazania i parametry należy weryfikować w dokumentacji urządzenia oraz zgodnie z przepisami.</li>
+      <li>Ostateczną decyzję o protokole zabiegowym podejmuje wykwalifikowany specjalista.</li>
+    </ul>
+    """
+
     return {
-        "privacy": (
-            "Polityka prywatności",
-            """
-            <p><strong>Wersja demo do uzupełnienia.</strong> W tej sekcji umieszcza się informacje o administratorze danych, celach i podstawach przetwarzania, okresach retencji, prawach osób oraz kontakcie.</p>
-            <h2>Formularz kontaktowy</h2>
-            <p>Wiadomości z formularza są zapisywane lokalnie w bazie SQLite. Integrację mailową można dodać w kolejnym kroku.</p>
-            """,
-        ),
-        "cookies": (
-            "Polityka cookies",
-            """
-            <p><strong>Wersja demo.</strong> Strona korzysta z podstawowych mechanizmów przeglądarki (np. sesje). Jeśli wdrożysz narzędzia analityczne, opisz je tutaj.</p>
-            """,
-        ),
-        "terms": (
-            "Regulamin",
-            """
-            <p><strong>Wersja demo.</strong> Określ zasady korzystania z serwisu, zakres odpowiedzialności, zasady kontaktu i warunki współpracy.</p>
-            """,
-        ),
-        "disclaimer": (
-            "Zastrzeżenia",
-            """
-            <p><strong>Wersja demo.</strong> Treści mają charakter informacyjny. Parametry i wskazania zabiegowe należy zawsze weryfikować w dokumentacji i zgodnie z przepisami.</p>
-            """,
-        ),
+        "privacy": ("Polityka prywatności", privacy),
+        "cookies": ("Polityka cookies", cookies),
+        "terms": ("Regulamin serwisu", terms),
+        "disclaimer": ("Zastrzeżenia", disclaimer),
     }
 
 

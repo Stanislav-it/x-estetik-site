@@ -293,6 +293,16 @@
             <input name="email" placeholder="E‑mail" class="input" required>
             <textarea name="message" placeholder="Wiadomość" rows="5" class="input" required></textarea>
             <button class="btn-primary w-fit" type="submit">Umów prezentację / kontakt</button>
+
+            <label class="mt-1 flex items-start gap-3 text-xs text-slate-600 leading-relaxed">
+              <input type="checkbox" name="privacy_accept" value="1" required class="mt-1">
+              <span>
+                Zapoznałem(-am) się z <a class="underline" href="{{ url_for('policy', slug='privacy') }}" target="_blank" rel="noreferrer">Polityką prywatności</a> i akceptuję jej postanowienia.
+              </span>
+            </label>
+            <div class="text-xs text-slate-500 leading-relaxed">
+              Administratorem danych jest {{ SITE_NAME }}. Dane przetwarzamy wyłącznie w celu odpowiedzi na zapytanie. Szczegóły: <a class="underline" href="{{ url_for('policy', slug='privacy') }}" target="_blank" rel="noreferrer">Polityka prywatności</a>.
+            </div>
           </div>
         </form>
       </div>
