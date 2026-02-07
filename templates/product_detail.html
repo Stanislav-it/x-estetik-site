@@ -15,7 +15,9 @@
     <div class="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-14 items-start">
       <div class="rounded-none sm:rounded-[28px] overflow-hidden border border-black/10 bg-white/70 backdrop-blur">
         {# Keep the whole device visible (like on listing cards) #}
-        <img src="{{ product.hero }}" alt="{{ product.name }}" class="w-full aspect-[4/3] object-contain p-3 sm:p-5" {% if product.photo_base %}data-photo-base="{{ product.photo_base }}"{% endif %}>
+        <div class="w-full aspect-[4/3] p-3 sm:p-5 bg-white/80" style="background-image:url('{{ product.hero }}'); background-size:contain; background-repeat:no-repeat; background-position:center; background-origin:content-box; background-clip:content-box;">
+          <img src="{{ product.hero }}" alt="{{ product.name }}" class="sr-only" {% if product.photo_base %}data-photo-base="{{ product.photo_base }}"{% endif %}>
+        </div>
       </div>
 
       <div>

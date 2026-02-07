@@ -27,14 +27,15 @@
       <nav class="site-nav" aria-label="Główne">
         <a class="site-nav-link" href="{{ url_for('about') }}">O nas</a>
         <a class="site-nav-link" href="{{ url_for('finansowanie') }}">Finansowanie</a>
+        <a class="site-nav-link" href="{{ url_for('gielda') }}" title="Giełda Sprzętu Kosmetycznego" aria-label="Giełda Sprzętu Kosmetycznego">Giełda</a>
         <a class="site-nav-link" href="{{ url_for('lasers') }}">Lasery</a>
-        <a class="site-nav-link" href="{{ url_for('hi_tech') }}">Urządzenia Hi‑Tech</a>
+        <a class="site-nav-link" href="{{ url_for('hi_tech') }}" title="Urządzenia Hi‑Tech" aria-label="Urządzenia Hi‑Tech">Hi‑Tech</a>
         {% if HAS_ACCESSORIES %}
         <a class="site-nav-link" href="{{ url_for('accessories') }}">Akcesoria</a>
         {% endif %}
         <a class="site-nav-link" href="{{ url_for('reviews') }}">Opinie</a>
         <a class="site-nav-link" href="{{ url_for('filmy') }}">Filmy</a>
-        <a class="site-nav-link" href="{{ url_for('social') }}">Media społecznościowe</a>
+        <a class="site-nav-link" href="{{ url_for('social') }}" title="Media społecznościowe" aria-label="Media społecznościowe">Media</a>
         <a class="site-nav-link" href="{{ url_for('index') }}#kontakt">Kontakt</a>
       </nav>
 
@@ -45,7 +46,7 @@
 
       <div class="site-actions">
         <a href="{{ url_for('catalog_download') }}" class="site-cta">
-          Pobierz katalog (PDF)
+          Katalog (PDF)
         </a>
 
         <button id="mobileMenuBtn" class="site-burger" aria-label="Menu" aria-expanded="false">
@@ -130,6 +131,7 @@
           <a class="pill-link" href="{{ url_for('social') }}">Zobacz QR</a>
           <a class="pill-link" href="{{ url_for('reviews') }}">Opinie</a>
           <a class="pill-link" href="{{ url_for('finansowanie') }}">Finansowanie</a>
+          <a class="pill-link" href="{{ url_for('gielda') }}">Giełda</a>
         </div>
       </div>
     </div>
@@ -174,6 +176,7 @@
       <nav class="mm-nav" aria-label="Menu">
         <a class="mm-item" href="{{ url_for('about') }}">O nas</a>
         <a class="mm-item" href="{{ url_for('finansowanie') }}">Finansowanie</a>
+        <a class="mm-item" href="{{ url_for('gielda') }}">Giełda Sprzętu Kosmetycznego</a>
         <a class="mm-item" href="{{ url_for('lasers') }}">Lasery</a>
         <a class="mm-item" href="{{ url_for('hi_tech') }}">Urządzenia Hi‑Tech</a>
         {% if HAS_ACCESSORIES %}

@@ -235,15 +235,19 @@ PRODUCTS: List[Product] = [
         slug="x-contour-krio",
         name="X‑Contour KRIO",
         category="hi-tech",
-        tag="Krioterapia / modelowanie",
-        short="Urządzenie do procedur opartych o chłodzenie (krioterapia) i modelowanie — protokoły dopasowane do obszarów ciała.",
+        tag="Kriolipoliza bezpróżniowa + EMS",
+        short="Bezpróżniowa kriolipoliza połączona z elektroporacją i EMS. 8 padów może pracować niezależnie lub jednocześnie, co pozwala wykonywać zabiegi na dużych obszarach ciała.",
         bullets=[
-            "System pracy oparty o kontrolowane chłodzenie.",
-            "Protokoły na różne obszary ciała.",
-            "Projektowane pod intensywną eksploatację gabinetową.",
+            "Do 8 padów działających jednocześnie — duże obszary zabiegowe.",
+            "Komfort bez użycia próżni: bez krwiaków i obrzęków spowodowanych zasysaniem.",
+            "Parametry: EMS 4000 Hz, temperatura 45°C do −10°C, 3 rodzaje kształtu fali.",
+            "35 minut zabiegu: 30 min padów E‑CRYO + 5 min aplikatora O‑Shock.",
+            "Deklarowane rezultaty: do 6,8 cm redukcji obwodu; 40–60% redukcji tłuszczu na zabieg (wg katalogu).",
         ],
-        price="49 000 zł",
+        price="55 000 zł",
+        rental="2600 zł",
         pages=list(range(64, 69)),
+        badge="Body shaping",
     ),
     Product(
         slug="x-shape",
@@ -560,6 +564,10 @@ def create_app() -> Flask:
     def finansowanie():
         return render_template("finansowanie.html")
 
+    @app.get("/gielda")
+    def gielda():
+        return render_template("gielda.html")
+
     @app.get("/lasery")
     def lasers():
         prods = [p for p in PRODUCTS if p.category == "lasers"]
@@ -634,7 +642,7 @@ def create_app() -> Flask:
 
     @app.get("/katalog")
     def catalog_download():
-        return send_from_directory(APP_DIR / "static" / "pdf", "X-Estetik-Katalog-2025.pdf", as_attachment=True)
+        return send_from_directory(APP_DIR / "static" / "pdf", "X-Estetik-Katalog-2026.pdf", as_attachment=True)
 
     @app.post("/lead")
     def lead():

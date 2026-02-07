@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% set title = "Giełda Sprzętu Kosmetycznego — X‑Estetik" %}
+
+{% block content %}
+<section class="paper-section">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-20 md:py-28">
+    <div class="grid gap-10 md:grid-cols-2 md:gap-16 items-start">
+      <h1 class="display-title">Giełda Sprzętu Kosmetycznego</h1>
+
+      <div class="prose-muted">
+        <p class="text-slate-900 font-medium">
+          Największa w Polsce prywatna giełda sprzętu kosmetycznego – 50&nbsp;000 profesjonalistów
+        </p>
+        <p>
+          Giełda Sprzętu Kosmetycznego to największa w Polsce prywatna społeczność profesjonalistów
+          zajmujących się realnym obrotem urządzeniami kosmetycznymi i medycyny estetycznej.
+          To miejsce, gdzie rynek faktycznie działa — pojawiają się realne oferty, opinie użytkowników
+          i informacje, których nie znajdziesz w katalogach producentów ani w reklamach.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-12">
+      <div class="rounded-none sm:rounded-[28px] overflow-hidden border border-black/10 bg-white shadow-[0_20px_50px_rgba(15,23,42,0.12)]">
+        <img src="{{ url_for('static', filename='img/gielda.jpg') }}" alt="Giełda Sprzętu Kosmetycznego" class="w-full h-auto" loading="lazy">
+      </div>
+    </div>
+
+    <div class="mt-14 grid gap-6 md:grid-cols-2">
+      <div class="info-card">
+        <div class="info-kicker">Dlaczego warto?</div>
+        <div class="info-title">Decyzje zakupowe oparte na rynku, nie na obietnicach</div>
+        <div class="mt-4 text-sm text-slate-700 leading-relaxed space-y-3">
+          <p>
+            To nie sklep ani platforma sprzedażowa. To niezależna przestrzeń wymiany informacji,
+            w której możesz szybciej ocenić płynność sprzętu, zobaczyć realne ceny rynkowe
+            i poznać doświadczenia innych użytkowników.
+          </p>
+          <ul class="mt-3 list-disc pl-5 space-y-2">
+            <li>realne oferty sprzedaży i zakupu urządzeń</li>
+            <li>opinie użytkowników, case’y i praktyczne wskazówki</li>
+            <li>obserwacja trendów technologicznych i cenowych</li>
+            <li>barometr rynku wtórnego (co się sprzedaje i za ile)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-kicker">Dostęp</div>
+        <div class="info-title">Przejdź do grupy na Facebooku</div>
+        <div class="mt-4 text-sm text-slate-700 leading-relaxed space-y-3">
+          <p>
+            👉 Przejdź do Giełdy Sprzętu Kosmetycznego
+            <span class="text-slate-500">(link prowadzi do zewnętrznej społeczności branżowej)</span>
+          </p>
+        </div>
+        <div class="mt-6">
+          <a href="https://www.facebook.com/share/g/1DuYvii15s/" target="_blank" rel="noreferrer" class="btn-primary">Wejdź na Facebooka ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <a href="{{ url_for('index') }}#kontakt" class="pill-link">Chcesz sprzedać / kupić sprzęt? Skontaktuj się z nami</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
