@@ -36,6 +36,10 @@ class Product:
     badge: str = ""
     pages: Optional[List[int]] = None  # for reference (images are pre-rendered)
 
+    # Optional: before/after effects gallery (static/efekty/<effects_folder>/...)
+    effects_folder: str = ""
+    effects_url: str = ""
+
 
 
 
@@ -46,7 +50,7 @@ PRODUCT_PHOTO_BASE = {
     'estetik-frax': 'Estetik Frax',
     'lumera-estetik': 'Lumera Estetik',
     'regen-lift': 'Regen Lift',
-    'x-blue-pen': 'X-Blue Pen',
+    'x-blue-pen': 'X-Pen',
     'x-boss': 'X-BOSS',
     'x-contour-krio': 'X-Contour KRIO',
     'x-derma': 'X-Derma',
@@ -74,6 +78,8 @@ PRODUCTS: List[Product] = [
         ],
         price="105 000 zł",
         pages=list(range(8, 16)),
+        effects_folder="x-levage",
+        effects_url="https://lasertulowyxlevage.pl/",
     ),
     Product(
         slug="x-levage-erbo",
@@ -88,6 +94,8 @@ PRODUCTS: List[Product] = [
         ],
         price="129 000 zł",
         pages=list(range(2, 8)),
+        effects_folder="x-levage-erbo",
+        effects_url="https://lasertulowyxlevage.pl/",
     ),
     Product(
         slug="depimax",
@@ -151,9 +159,9 @@ PRODUCTS: List[Product] = [
     # --- HI‑TECH ---
     Product(
         slug="x-v980",
-        name="X‑V980 (laser naczyniowy 980 nm)",
-        category="hi-tech",
-        tag="Laser 980 nm",
+        name="X‑V980 (laser diodowy naczyniowy 980 nm)",
+        category="lasers",
+        tag="Laser diodowy 980 nm",
         short="Laser diodowy 980 nm do pracy z naczynkami — precyzyjna aplikacja i szybkie rezultaty w zamykaniu zmian naczyniowych.",
         bullets=[
             "Długość fali: 980 nm.",
@@ -167,7 +175,7 @@ PRODUCTS: List[Product] = [
     Product(
         slug="x-boss",
         name="X‑BOSS (Q‑Switch) / X‑Boss Pro™",
-        category="hi-tech",
+        category="lasers",
         tag="Q‑Switch",
         short="Laser Q‑Switch do usuwania tatuaży i przebarwień — konfiguracje wielowiązkowe oraz funkcje peelingu węglowego (w zależności od wersji).",
         bullets=[
@@ -279,25 +287,12 @@ PRODUCTS: List[Product] = [
         price="15 000 zł",
         pages=[91, 92, 93, 94, 97, 98, 99],
     ),
-    Product(
-        slug="mezo-blask",
-        name="Mezo Blask",
-        category="hi-tech",
-        tag="System terapeutyczny",
-        short="Nieinwazyjny system transportu kwasu hialuronowego i substancji aktywnych do głębszych warstw skóry (bezdotykowo).",
-        bullets=[
-            "Nieinwazyjny i bezdotykowy zabieg.",
-            "Wspiera poprawę wyglądu skóry i nawilżenie.",
-            "Programy dopasowane do różnych typów skóry.",
-        ],
-        pages=[95, 96],
-    ),
 
     # --- AKCESORIA ---
     Product(
         slug="x-blue-pen",
-        name="X‑Blue Pen (mikronakłuwanie)",
-        category="accessories",
+        name="X‑Pen (mikronakłuwanie)",
+        category="hi-tech",
         tag="Micro‑needling",
         short="Urządzenie do mikroigłowego nakłuwania z jednorazowymi kartridżami. Szybka praca i ergonomia dla gabinetu.",
         bullets=[
@@ -312,7 +307,7 @@ PRODUCTS: List[Product] = [
     Product(
         slug="biopen-q2",
         name="Bio Pen Q2",
-        category="accessories",
+        category="hi-tech",
         tag="Micro‑needling + EMS + LED",
         short="Urządzenie łączące mikronakłuwanie, elektroporację EMS i światło LED. Wielofunkcyjne podejście do pielęgnacji i wsparcia regeneracji skóry.",
         bullets=[
@@ -367,8 +362,17 @@ def create_app() -> Flask:
         CONTACT_NOTE=get_env("CONTACT_NOTE", "Odpowiadamy w dni robocze."),
         INSTAGRAM_URL=get_env("INSTAGRAM_URL", "https://www.instagram.com/xestetik/"),
         INSTAGRAM_HANDLE=get_env("INSTAGRAM_HANDLE", "@xestetik"),
-        FACEBOOK_URL=get_env("FACEBOOK_URL", "https://www.facebook.com/lasertulowyxlevage"),
-        FACEBOOK_HANDLE=get_env("FACEBOOK_HANDLE", "lasertulowyxlevage"),
+        FACEBOOK_URL=get_env("FACEBOOK_URL", "https://www.facebook.com/share/16zqxJveFY/"),
+        FACEBOOK_HANDLE=get_env("FACEBOOK_HANDLE", "X‑Estetik"),
+
+        FACEBOOK_EPILACJA_URL=get_env("FACEBOOK_EPILACJA_URL", "https://www.facebook.com/share/17P4zyb7vj/"),
+        FACEBOOK_EPILACJA_HANDLE=get_env("FACEBOOK_EPILACJA_HANDLE", "Laser diodowy do epilacji"),
+
+        FACEBOOK_ESTETIK_FRAX_URL=get_env("FACEBOOK_ESTETIK_FRAX_URL", "https://www.facebook.com/share/1DrByjvhom/"),
+        FACEBOOK_ESTETIK_FRAX_HANDLE=get_env("FACEBOOK_ESTETIK_FRAX_HANDLE", "Estetik Frax"),
+
+        FACEBOOK_TULOWY_ERBO_URL=get_env("FACEBOOK_TULOWY_ERBO_URL", "https://www.facebook.com/lasertulowyxlevage"),
+        FACEBOOK_TULOWY_ERBO_HANDLE=get_env("FACEBOOK_TULOWY_ERBO_HANDLE", "laser tulowy + erbowo szklany"),
         TIKTOK_URL=get_env("TIKTOK_URL", "https://www.tiktok.com/"),
         TIKTOK_HANDLE=get_env("TIKTOK_HANDLE", "TikTok"),
         DB_PATH=get_env("DB_PATH", str(APP_DIR / "instance" / "app.db")),
@@ -508,6 +512,7 @@ def create_app() -> Flask:
             "INSTAGRAM_HANDLE": app.config.get("INSTAGRAM_HANDLE", ""),
             "FACEBOOK_URL": app.config.get("FACEBOOK_URL", ""),
             "FACEBOOK_HANDLE": app.config.get("FACEBOOK_HANDLE", ""),
+            "HAS_ACCESSORIES": any(p.category == "accessories" for p in PRODUCTS),
             "STATIC_VERSION": app.config["STATIC_VERSION"],
             "CURRENT_YEAR": datetime.utcnow().year,
             "video_url": resolve_video,
@@ -551,6 +556,10 @@ def create_app() -> Flask:
         )
         return render_template("about.html", about_text=about_text)
 
+    @app.get("/finansowanie")
+    def finansowanie():
+        return render_template("finansowanie.html")
+
     @app.get("/lasery")
     def lasers():
         prods = [p for p in PRODUCTS if p.category == "lasers"]
@@ -573,9 +582,14 @@ def create_app() -> Flask:
     @app.get("/media-spolecznosciowe")
     def social():
         socials = [
-            {"label": "Instagram", "handle": app.config["INSTAGRAM_HANDLE"], "url": app.config["INSTAGRAM_URL"], "qr": url_for("static", filename="img/qr/instagram.png")},
-            {"label": "Facebook", "handle": app.config["FACEBOOK_HANDLE"], "url": app.config["FACEBOOK_URL"], "qr": url_for("static", filename="img/qr/facebook.png")},
+            {"label": "Instagram", "handle": app.config.get("INSTAGRAM_HANDLE", ""), "url": app.config.get("INSTAGRAM_URL", ""), "qr": url_for("static", filename="img/qr/instagram.png")},
+
+            {"label": "Facebook — fanpage firmowy", "handle": app.config.get("FACEBOOK_HANDLE", ""), "url": app.config.get("FACEBOOK_URL", ""), "qr": url_for("static", filename="img/qr/facebook.png")},
+            {"label": "Facebook — laser diodowy do epilacji", "handle": app.config.get("FACEBOOK_EPILACJA_HANDLE", ""), "url": app.config.get("FACEBOOK_EPILACJA_URL", ""), "qr": url_for("static", filename="img/qr/facebook_epilacja.png")},
+            {"label": "Facebook — Estetik Frax", "handle": app.config.get("FACEBOOK_ESTETIK_FRAX_HANDLE", ""), "url": app.config.get("FACEBOOK_ESTETIK_FRAX_URL", ""), "qr": url_for("static", filename="img/qr/facebook_estetik_frax.png")},
+            {"label": "Facebook — laser tulowy + erbowo szklany", "handle": app.config.get("FACEBOOK_TULOWY_ERBO_HANDLE", ""), "url": app.config.get("FACEBOOK_TULOWY_ERBO_URL", ""), "qr": url_for("static", filename="img/qr/facebook_tulowy_erbo.png")},
         ]
+        socials = [s for s in socials if s.get("url")]
         return render_template("social.html", socials=socials)
 
     @app.get("/filmy")
@@ -599,7 +613,24 @@ def create_app() -> Flask:
         view["hero"] = view["thumb"] if view.get("photo_base") else (first_gallery_image(slug) or view["thumb"])
         view["gallery"] = list_gallery_images(slug)
 
-        return render_template("product_detail.html", product=view)
+        # Effects (before/after) — visible for selected devices
+        effects_folder = (p.effects_folder or "").strip()
+        effects_url = (p.effects_url or "").strip()
+        effects_enabled = bool(effects_folder or effects_url)
+        folder = effects_folder or p.slug
+        effects_images = list_effect_images(folder)
+        # Optional fallback: if mapping uses a custom folder but it's empty
+        if not effects_images and effects_folder and effects_folder != p.slug:
+            effects_images = list_effect_images(p.slug)
+
+        return render_template(
+            "product_detail.html",
+            product=view,
+            effects_enabled=effects_enabled,
+            effects_images=effects_images,
+            effects_folder=folder,
+            effects_tech_url=effects_url,
+        )
 
     @app.get("/katalog")
     def catalog_download():
@@ -776,6 +807,8 @@ def to_view(p: Product) -> Dict:
         "badge": p.badge,
         "thumb": thumb,
         "photo_base": photo_base,
+        "effects_folder": p.effects_folder,
+        "effects_url": p.effects_url,
     }
 
 
@@ -786,6 +819,31 @@ def list_gallery_images(slug: str) -> List[str]:
     imgs = sorted([p for p in folder.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}])
     return [url_for("static", filename=f"img/catalog/{slug}/{p.name}") for p in imgs]
 
+
+
+
+def list_effect_images(folder_name: str) -> List[str]:
+    """List before/after effect images from static/efekty/<folder_name>/.
+
+    The folder is optional and must be a single path segment (no traversal).
+    Supported formats: .jpg/.jpeg/.png/.webp
+    """
+    folder_name = (folder_name or "").strip().strip("/\\")
+    if not folder_name:
+        return []
+
+    # Prevent path traversal
+    if "/" in folder_name or "\\" in folder_name or ".." in folder_name:
+        return []
+
+    folder = APP_DIR / "static" / "efekty" / folder_name
+    if not folder.exists():
+        return []
+
+    imgs = sorted(
+        [p for p in folder.iterdir() if p.is_file() and p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}]
+    )
+    return [url_for("static", filename=f"efekty/{folder_name}/{p.name}") for p in imgs]
 
 def first_gallery_image(slug: str) -> str:
     imgs = list_gallery_images(slug)
@@ -958,6 +1016,9 @@ def ensure_qr_codes(app: Flask) -> None:
     items = [
         ("instagram.png", app.config.get("INSTAGRAM_URL", "")),
         ("facebook.png", app.config.get("FACEBOOK_URL", "")),
+        ("facebook_epilacja.png", app.config.get("FACEBOOK_EPILACJA_URL", "")),
+        ("facebook_estetik_frax.png", app.config.get("FACEBOOK_ESTETIK_FRAX_URL", "")),
+        ("facebook_tulowy_erbo.png", app.config.get("FACEBOOK_TULOWY_ERBO_URL", "")),
     ]
 
     for filename, url in items:

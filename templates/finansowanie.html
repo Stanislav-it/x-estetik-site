@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% set title = "Finansowanie — X‑Estetik" %}
+
+{% block content %}
+<section class="paper-section">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-20 md:py-28">
+    <div class="grid gap-10 md:grid-cols-2 md:gap-16 items-start">
+      <h1 class="display-title">Finansowanie</h1>
+
+      <div class="prose-muted">
+        <p>
+          Inwestycja w nowoczesne technologie nie musi oznaczać jednorazowego, dużego wydatku.
+          W X‑Estetik oferujemy elastyczne formy finansowania, dopasowane do realnych możliwości Twojego gabinetu.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-14 grid gap-6 md:grid-cols-2">
+      <div class="info-card">
+        <div class="info-kicker">Leasing</div>
+        <div class="info-title">Najlepsza oferta, wybrana za Ciebie</div>
+        <div class="mt-4 text-sm text-slate-700 leading-relaxed space-y-3">
+          <p>
+            Współpracujemy z wieloma instytucjami finansowymi. Nasz doradca analizuje oferty kilkunastu banków
+            i firm leasingowych, a następnie wybiera najkorzystniejsze rozwiązanie dokładnie pod Twoją sytuację.
+          </p>
+          <p>
+            Bez biegania, bez porównywania tabel, bez zgadywania — dostajesz konkretną propozycję,
+            która ma sens biznesowy.
+          </p>
+          <p class="font-medium text-slate-900">Ty wybierasz urządzenie. My zajmujemy się resztą.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-kicker">Raty 0%</div>
+        <div class="info-title">Bez banków, bez odsetek</div>
+        <div class="mt-4 text-sm text-slate-700 leading-relaxed space-y-3">
+          <p>
+            Dla klientów, którzy wolą prostotę i pełną kontrolę, przygotowaliśmy wewnętrzny system rat 0%,
+            bez udziału banków i firm zewnętrznych.
+          </p>
+          <div>
+            <div class="font-medium text-slate-900">Jak to działa?</div>
+            <ul class="mt-3 list-disc pl-5 space-y-2">
+              <li>wpłacasz 50% wartości urządzenia</li>
+              <li>pozostałe 50% rozkładamy nawet na 20 rat</li>
+              <li>0% oprocentowania, 0% prowizji, 0% ukrytych kosztów</li>
+            </ul>
+          </div>
+          <p>
+            Krótko mówiąc: płacisz dokładnie tyle, ile kosztuje urządzenie. Ani złotówki więcej.
+          </p>
+          <p class="font-medium text-slate-900">To finansowanie ma jeden cel:</p>
+          <p>
+            żeby sprzęt zaczął na siebie zarabiać, zanim zdążysz pomyśleć, że to była duża decyzja.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <a href="{{ url_for('index') }}#kontakt" class="btn-primary">Zapytaj o finansowanie</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

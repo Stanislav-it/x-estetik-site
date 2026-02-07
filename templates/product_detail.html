@@ -87,6 +87,58 @@
         </div>
       </div>
     {% endif %}
+
+    {% if effects_enabled %}
+      <div class="mt-20" id="efekty">
+        <div class="flex flex-wrap items-start justify-between gap-6">
+          <div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <h2 class="text-2xl md:text-3xl font-semibold tracking-tight">Efekty zabiegów</h2>
+              <span class="inline-flex items-center rounded-full border border-black/10 bg-white/70 backdrop-blur px-3 py-1 text-sm text-slate-700">{{ effects_images|length }} zdjęć</span>
+            </div>
+            <p class="mt-2 text-slate-600">Wybrane rezultaty zabiegów — dokumentacja przed/po.</p>
+          </div>
+
+          {% if effects_tech_url %}
+            <a class="text-sm underline text-slate-600 hover:text-slate-900" href="{{ effects_tech_url }}" target="_blank" rel="noreferrer">Zobacz opis technologii</a>
+          {% endif %}
+        </div>
+
+        {% if effects_images and effects_images|length %}
+          <div class="mt-10" data-effects-gallery data-initial="8" data-step="8">
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {% for img in effects_images %}
+                <a href="{{ img }}" data-lightbox data-effects-item class="block rounded-[28px] overflow-hidden border border-black/10 bg-white/70 {% if loop.index0 >= 8 %}hidden{% endif %}">
+                  <img src="{{ img }}" alt="Efekt zabiegu {{ loop.index }}" class="w-full aspect-[4/3] object-cover" loading="lazy">
+                </a>
+              {% endfor %}
+            </div>
+
+            <div class="mt-8 flex flex-wrap items-center justify-between gap-6">
+              <div class="text-sm text-slate-600">Pokazano <span data-effects-shown>0</span> z <span data-effects-total>{{ effects_images|length }}</span></div>
+              <button type="button" data-effects-more class="inline-flex items-center justify-center rounded-full bg-slate-900 text-white px-8 py-4 text-base font-medium hover:bg-slate-800 transition"></button>
+            </div>
+
+            {% if effects_tech_url %}
+              <div class="mt-6">
+                <a class="btn-ghost" href="{{ effects_tech_url }}" target="_blank" rel="noreferrer">Szybki dostęp: lasertulowyX‑Levage <span aria-hidden="true">↗</span></a>
+              </div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="mt-10 rounded-3xl border border-black/10 bg-white/70 p-6 text-slate-700">
+            Materiały „przed/po” w przygotowaniu. Zdjęcia dodaj do folderu:
+            <code class="ml-2 px-2 py-1 rounded-lg bg-black/5">static/efekty/{{ effects_folder }}</code>
+          </div>
+          {% if effects_tech_url %}
+            <div class="mt-6">
+              <a class="btn-ghost" href="{{ effects_tech_url }}" target="_blank" rel="noreferrer">Szybki dostęp: lasertulowyX‑Levage <span aria-hidden="true">↗</span></a>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+
   </div>
 </section>
 {% endblock %}
