@@ -62,6 +62,7 @@ PRODUCT_PHOTO_BASE = {
     'x-levage': 'X-Levage Pro',
     'x-shape': 'X-Shape',
     'x-v980': 'X-V980',
+    'chlodzenie-powietrzem-iii': 'Chłodzenie powietrzem III',
 }
 
 PRODUCTS: List[Product] = [
@@ -293,6 +294,22 @@ PRODUCTS: List[Product] = [
         pages=[91, 92, 93, 94, 97, 98, 99],
     ),
 
+    Product(
+        slug="chlodzenie-powietrzem-iii",
+        name="Chłodziarka zabiegowa (Chłodzenie powietrzem III)",
+        category="hi-tech",
+        tag="Chłodzenie powietrzem −30°C",
+        short="System chłodzenia powietrzem do stosowania przed, w trakcie i po zabiegach laserowych, IPL i RF — redukuje ból, zaczerwienienie, obrzęk oraz ryzyko uszkodzeń termicznych.",
+        bullets=[
+            "Regulowany zakres temperatur: −4°C do −30°C.",
+            "Moc chłodzenia 1500 W + 8 biegów wentylatora.",
+            "Kompresor do pracy ciągłej, system samoodmrażania i samoodwadniania.",
+            "Przewód powietrzny 2,5 m (lekki przewód 200 g) + stabilny stojak.",
+            "Zastosowanie: depilacja laserowa, laser PICO, laser frakcyjny CO₂, zabiegi RF oraz czasowe znieczulenie przed iniekcjami.",
+        ],
+        price="19 900 zł",
+    ),
+
     # --- AKCESORIA ---
     Product(
         slug="x-blue-pen",
@@ -349,6 +366,7 @@ HOME_PAGE_ORDER: List[str] = [
     "x-derma",
     "x-blue-pen",
     "biopen-q2",
+    "chlodzenie-powietrzem-iii",
 ]
 
 HOME_PAGE_ORDER_MAP: Dict[str, int] = {slug: i for i, slug in enumerate(HOME_PAGE_ORDER)}
