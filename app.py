@@ -1304,5 +1304,6 @@ def ensure_qr_codes(app: Flask) -> None:
 app = create_app()
 
 if __name__ == "__main__":
-    # Port 5050 as requested.
-    app.run(host="0.0.0.0", port=5050, debug=True)
+    port = int(os.environ.get("PORT", "5050"))  # локально будет 5050, на сервере возьмёт PORT
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug)
