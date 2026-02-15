@@ -469,14 +469,13 @@ STRONY_WWW_FILES=get_env(
 
 
         # Optional external override for the HERO video ("video 1").
-        # If set, the site will use this URL *only when the local file is missing*.
+        # If set, the site will prefer this URL for "video 1" (e.g. Cloudflare R2 public URL).
         # You can pass either:
-        #   - a Google Drive share URL (e.g. https://drive.google.com/file/d/<id>/view?...)
-        #   - or a raw Drive file id.
-        # Default: the user-provided Drive file.
+        #   - a Google Drive share URL / Drive file id
+        #   - or a direct HTTPS URL
         VIDEO_1_URL=get_env(
             "VIDEO_1_URL",
-            "https://drive.google.com/file/d/1GeLb0EQsq8bxrajZ74LNE6UvUUkiPBy0/view?usp=sharing",
+            "https://pub-6b9f87ec02e04dc88c5b18144e88754a.r2.dev/video%201.mp4",
         ),
     )
 
@@ -569,12 +568,7 @@ STRONY_WWW_FILES=get_env(
             if not base:
                 return []
 
-            # Prefer local static file when present.
-            local = resolve_static_video(base)
-            if local:
-                return [local]
-
-            # For HERO video ("video 1"), fall back to an external URL (e.g. Google Drive).
+            # For HERO video ("video 1"), prefer an external URL (Cloudflare R2 / Drive / direct).
             if base.lower() == "video 1":
                 raw = (app.config.get("VIDEO_1_URL") or "").strip()
                 if raw:
@@ -582,6 +576,11 @@ STRONY_WWW_FILES=get_env(
                     if drive_id:
                         return drive_direct_download_candidates(drive_id)
                     return [raw]
+
+            # Prefer local static file when present.
+            local = resolve_static_video(base)
+            if local:
+                return [local]
 
             return []
 
