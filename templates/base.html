@@ -36,6 +36,7 @@
         <a class="site-nav-link" href="{{ url_for('reviews') }}">Opinie</a>
         <a class="site-nav-link" href="{{ url_for('filmy') }}">Filmy</a>
         <a class="site-nav-link" href="{{ url_for('social') }}" title="Media społecznościowe">Media</a>
+        <a class="site-nav-link" href="{{ url_for('strony_www_dla_gabinetow') }}">Strony WWW</a>
         <a class="site-nav-link" href="{{ url_for('index') }}#kontakt">Kontakt</a>
       </nav>
 
@@ -208,6 +209,7 @@
         <a class="mm-item" href="{{ url_for('accessories') }}">Akcesoria</a>
         {% endif %}
         <a class="mm-item" href="{{ url_for('gielda') }}">Giełda Sprzętu Kosmetycznego</a>
+        <a class="mm-item" href="{{ url_for('strony_www_dla_gabinetow') }}">Strony WWW</a>
         <a class="mm-item" href="{{ url_for('finansowanie') }}">Finansowanie</a>
         <a class="mm-item" href="{{ url_for('reviews') }}">Opinie</a>
         <a class="mm-item" href="{{ url_for('filmy') }}">Filmy</a>
@@ -216,7 +218,7 @@
       </nav>
 
       <div class="mm-bottom">
-        <a class="mm-pill" href="{{ url_for('catalog_download') }}">Pobierz katalog PDF <span aria-hidden="true">↗</span></a>
+        <a class="mm-pill" href="{{ url_for('catalog_download') }}">Pobierz katalog PDF</a>
       </div>
     </aside>
   </div>

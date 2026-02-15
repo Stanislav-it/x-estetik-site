@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+  /* Strony WWW — “droższy” look: miękkie cienie + głębia (z-space) */
+  .sw-hero {
+    position: relative;
+    padding: 56px 0 52px;
+    background:
+      radial-gradient(900px 420px at 50% 0%, rgba(15, 23, 42, 0.10), transparent 60%),
+      radial-gradient(700px 320px at 20% 15%, rgba(2, 132, 199, 0.06), transparent 60%),
+      linear-gradient(180deg, #f6f1ea 0%, #ffffff 58%);
+    overflow: hidden;
+  }
+  .sw-hero::after {
+    content: "";
+    position: absolute;
+    inset: -120px -80px;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.70), transparent 65%);
+    filter: blur(10px);
+    opacity: 0.60;
+    pointer-events: none;
+  }
+  .sw-hero > * { position: relative; z-index: 1; }
+
+  .sw-cta {
+    box-shadow:
+      0 22px 50px rgba(15, 23, 42, 0.26),
+      0 8px 16px rgba(15, 23, 42, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transform: translateZ(0);
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+  }
+  .sw-cta:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 30px 70px rgba(15, 23, 42, 0.30),
+      0 10px 22px rgba(15, 23, 42, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+  .sw-cta:active { transform: translateY(0px) scale(0.99); }
+
+  .sw-cta-secondary{
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    background: rgba(255,255,255,0.70);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 14px 38px rgba(15,23,42,0.10), 0 6px 14px rgba(15,23,42,0.06);
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+  }
+  .sw-cta-secondary:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 20px 52px rgba(15,23,42,0.12), 0 8px 18px rgba(15,23,42,0.07);
+    background: rgba(255,255,255,0.85);
+  }
+  .sw-cta-secondary:active{ transform: translateY(0px) scale(0.99); }
+
+  .sw-portfolio {
+    padding: 48px 0 100px;
+    background: #ffffff;
+  }
+  .sw-grid {
+    perspective: 1200px;
+  }
+  .sw-card {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255, 255, 255, 0.86);
+    box-shadow:
+      0 50px 140px rgba(15, 23, 42, 0.16),
+      0 10px 28px rgba(15, 23, 42, 0.07);
+    transform: translateZ(0);
+    transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+    will-change: transform, box-shadow;
+  }
+  .sw-card::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    background: radial-gradient(800px 260px at 15% 0%, rgba(255, 255, 255, 0.55), transparent 55%);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  .sw-card:hover {
+    transform: translateY(-8px) rotateX(1deg);
+    box-shadow:
+      0 70px 190px rgba(15, 23, 42, 0.20),
+      0 18px 38px rgba(15, 23, 42, 0.10);
+    filter: saturate(1.04);
+  }
+  .sw-card img {
+    display: block;
+    width: 100%;
+    height: auto; /* nie przycinamy — “potok fotek” */
+  }
+
+  @media (max-width: 768px) {
+    .sw-hero { padding: 72px 0 52px; }
+    .sw-card:hover { transform: translateY(-4px); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="sw-hero">
+	  <div class="mx-auto max-w-[980px] text-center px-5 md:px-8"><h1 class="text-4xl md:text-6xl font-extrabold leading-[1.02] text-slate-900">
+	      Tworzymy strony internetowe&nbsp;i kampanie reklamowe,<br class="hidden md:block">
+	      które sprzedają zabiegi.
+	    </h1>
+
+    <p class="mt-4 text-slate-600 text-base md:text-lg">
+      Szybkie i niedrogie strony oraz sklepy internetowe dla branży beauty — gotowe do startu w krótkim czasie.
+    </p>
+
+    <div class="mt-6 mx-auto max-w-[560px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <a class="sw-cta inline-flex items-center justify-center rounded-full bg-slate-900 px-7 py-3 text-white font-semibold hover:bg-slate-800"
+         href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener">
+        Napisz na WhatsApp
+      </a>
+      <a class="sw-cta-secondary inline-flex items-center justify-center rounded-full px-7 py-3 font-semibold text-slate-900"
+         href="#portfolio">
+        Wybrane realizacje
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="portfolio" class="sw-portfolio">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8">
+    <div class="sw-grid grid grid-cols-1 md:grid-cols-2 gap-10">
+      {% for img in portfolio_images %}
+      <div class="sw-card">
+        <img loading="lazy" src="{{ url_for('static', filename=img) }}" alt="Realizacja {{ loop.index }}" />
+      </div>
+      {% endfor %}
+
+      {% if not portfolio_images %}
+      <div class="md:col-span-2 rounded-[28px] border border-black/10 bg-white p-8 text-center text-slate-600">
+        Dodaj zdjęcia do folderu <b>static/img/strony_www</b> (png/jpg/webp), a pojawią się tutaj automatycznie.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

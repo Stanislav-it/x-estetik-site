@@ -249,6 +249,37 @@
   </div>
 </section>
 
+<!-- STRONY WWW (po krokach współpracy) -->
+<section class="vanilla-section vanilla-section--pale pt-0" id="strony-www">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 pb-24 md:pb-32">
+    <div class="rounded-[32px] border border-black/10 bg-white/35 backdrop-blur-[10px] overflow-hidden">
+      <div class="grid gap-10 lg:grid-cols-2 p-8 md:p-12 items-center">
+        <div>
+          <div class="section-kicker">STRONY WWW</div>
+          <h2 class="section-title mt-3">Szybkie i niedrogie strony WWW dla gabinetów beauty</h2>
+          <p class="mt-4 text-slate-700 leading-relaxed max-w-[620px]">
+            Projekt i wdrożenie pod klucz: szybkie i niedrogie strony WWW oraz sklepy internetowe.
+            Estetycznie i z naciskiem na konwersję.
+          </p>
+
+          <div class="mt-7 flex flex-col sm:flex-row sm:items-center gap-3">
+            <a class="btn-primary" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener">Napisz na WhatsApp</a>
+            <a class="btn-ghost" href="{{ url_for('strony_www_dla_gabinetow') }}">Wybrane projekty</a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {% for fn in (home_strony_images or []) %}
+            <div class="rounded-[26px] border border-black/10 bg-white/70 shadow-soft overflow-hidden">
+              <img loading="lazy" class="w-full h-auto" src="{{ url_for('static', filename='img/strony_www/' ~ fn) }}" alt="Wybrany projekt {{ loop.index }}">
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- OPINIE -->
 <section class="paper-section pt-0" id="opinie">
   <div class="mx-auto max-w-[1180px] px-5 md:px-8 pb-24 md:pb-32">

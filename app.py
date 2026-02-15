@@ -408,7 +408,7 @@ def create_app() -> Flask:
         SITE_NAME=get_env("SITE_NAME", "X‑Estetik"),
         BRAND=get_env("BRAND", "X‑Estetik"),
         CONTACT_EMAIL=get_env("CONTACT_EMAIL", "biuro.x-estetik@op.pl"),
-        CONTACT_PHONE=get_env("CONTACT_PHONE", "+48 518 151 673"),
+        CONTACT_PHONE=get_env("CONTACT_PHONE", "+48 723 698 910"),
         CONTACT_NOTE=get_env("CONTACT_NOTE", "Odpowiadamy w dni robocze."),
         INSTAGRAM_URL=get_env("INSTAGRAM_URL", "https://www.instagram.com/xestetik/"),
         INSTAGRAM_HANDLE=get_env("INSTAGRAM_HANDLE", "@xestetik"),
@@ -477,7 +477,13 @@ def create_app() -> Flask:
             m = re.search(r"(\d+)", name)
             return int(m.group(1)) if m else 10**9
 
+        # Natural order, but start from "video 16" (and then continue 17, 18, ... wrapping around).
+        # User requirement: the first clip shown should be video 16.
         files = sorted(files, key=lambda s: (num_key(s), s.lower()))
+
+        start_idx = next((i for i, fn in enumerate(files) if num_key(fn) == 16), None)
+        if start_idx is not None:
+            files = files[start_idx:] + files[:start_idx]
 
         showcase: list[dict] = []
         for fn in files:
@@ -576,6 +582,9 @@ def create_app() -> Flask:
     def index():
         # Homepage blocks
         home_reviews = sample_reviews()[:6]
+
+        # WhatsApp number for wa.me links (digits only, incl. country code)
+        whatsapp_number = re.sub(r"\D", "", app.config.get("CONTACT_PHONE", ""))
         def home_sort_key(p: Product):
             # Sort by the explicit homepage order first; then fall back to name.
             return (HOME_PAGE_ORDER_MAP.get(p.slug, 10**9), p.name.lower())
@@ -583,12 +592,36 @@ def create_app() -> Flask:
         lasers_all = sorted([p for p in PRODUCTS if p.category == "lasers"], key=home_sort_key)
         hi_tech_all = sorted([p for p in PRODUCTS if p.category == "hi-tech"], key=home_sort_key)
         accessories_all = sorted([p for p in PRODUCTS if p.category == "accessories"], key=home_sort_key)
+        # Homepage mini-portfolio (Strony WWW) – always show 4 images:
+        # first two are pinned, the next two are taken from the folder.
+        strony_dir = APP_DIR / "static" / "img" / "strony_www"
+        pinned = [
+            "e37b8879-cff3-42eb-aa09-7395d7cc2880.png",
+            "765eb34f-345e-491d-803e-c125ecf6a842.png",
+        ]
+        home_strony_images: list[str] = pinned.copy()
+        try:
+            if strony_dir.exists():
+                all_imgs = [
+                    p.name
+                    for p in strony_dir.iterdir()
+                    if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}
+                ]
+                all_imgs = sorted(all_imgs, key=lambda x: x.lower())
+                extra = [fn for fn in all_imgs if fn not in pinned]
+                home_strony_images = pinned + extra[:2]
+        except Exception:
+            # Non-fatal: keep pinned images only.
+            pass
+
         return render_template(
             "index.html",
             lasers_products=[to_view(p) for p in lasers_all],
             hi_tech_products=[to_view(p) for p in hi_tech_all],
             accessories_products=[to_view(p) for p in accessories_all],
             home_reviews=home_reviews,
+            whatsapp_number=whatsapp_number,
+            home_strony_images=home_strony_images,
         )
 
     @app.get("/o-nas")
@@ -647,6 +680,41 @@ def create_app() -> Flask:
         ]
         socials = [s for s in socials if s.get("url")]
         return render_template("social.html", socials=socials)
+
+
+
+
+    @app.get("/strony-www-dla-gabinetow")
+    def strony_www_dla_gabinetow():
+        # WhatsApp number for wa.me links (digits only, incl. country code)
+        whatsapp_number = re.sub(r"\D", "", app.config.get("CONTACT_PHONE", ""))
+
+        # Portfolio: automatically list all images from static/img/strony_www (no hardcoded filenames)
+        folder = APP_DIR / 'static' / 'img' / 'strony_www'
+        exts = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
+        files = []
+        if folder.exists():
+            for fp in folder.iterdir():
+                if not fp.is_file():
+                    continue
+                if fp.suffix.lower() not in exts:
+                    continue
+                lname = fp.name.lower()
+                if lname.startswith('readme') or lname.startswith('.'):
+                    continue
+                if lname.startswith('hero'):
+                    continue
+                files.append(fp)
+        files.sort(key=lambda x: x.name.lower())
+        portfolio_images = [f"img/strony_www/{fp.name}" for fp in files]
+
+        return render_template(
+            "strony_www.html",
+            title="Strony WWW dla gabinetów",
+            meta_description="Strony WWW i kampanie reklamowe dla gabinetów beauty. Portfolio realizacji i kontakt WhatsApp.",
+            whatsapp_number=whatsapp_number,
+            portfolio_images=portfolio_images,
+        )
 
     @app.get("/filmy")
     def filmy():
@@ -1187,5 +1255,5 @@ def ensure_qr_codes(app: Flask) -> None:
 app = create_app()
 
 if __name__ == "__main__":
-    # Port 5000 as requested.
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # Port 5050 as requested.
+    app.run(host="0.0.0.0", port=5050, debug=True)
