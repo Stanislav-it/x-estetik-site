@@ -132,7 +132,7 @@
     <div class="sw-grid grid grid-cols-1 md:grid-cols-2 gap-10">
       {% for img in portfolio_images %}
       <div class="sw-card">
-        <img loading="lazy" src="{{ url_for('static', filename=img) }}" alt="Realizacja {{ loop.index }}" />
+        <img loading="lazy" src="{{ img if img.startswith('http') else url_for('static', filename=img) }}" alt="Realizacja {{ loop.index }}" />
       </div>
       {% endfor %}
 

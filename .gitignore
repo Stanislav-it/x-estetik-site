@@ -3,3 +3,12 @@ __pycache__/
 instance/*.db
 instance/*.db-journal
 .DS_Store
+
+# Large assets (keep in Cloudflare R2 / external storage)
+static/video/
+static/videos/
+static/img/strony_www/*.png
+static/img/strony_www/*.jpg
+static/img/strony_www/*.jpeg
+static/img/strony_www/*.webp
+static/img/strony_www/*.gif

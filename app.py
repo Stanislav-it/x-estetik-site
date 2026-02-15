@@ -437,6 +437,37 @@ def create_app() -> Flask:
             "video 5.mp4,video 8.mp4,video 9.mp4,video 10.mp4,video 11.mp4,video 14.mp4,video 15.mp4,video 16.mp4,video 17.mp4,video 18.mp4,video 19.mp4,video 20.mp4,video 21.mp4",
         ),
 
+# R2 public folder base URL for Strony WWW portfolio images.
+# Example: https://<pub-...>.r2.dev/strony_www
+STRONY_WWW_BASE_URL=get_env(
+    "STRONY_WWW_BASE_URL",
+    get_env("FILMY_BASE_URL", "https://pub-6b9f87ec02e04dc88c5b18144e88754a.r2.dev").rstrip("/") + "/strony_www",
+),
+
+# Comma-separated list of image object names in the R2 /strony_www folder.
+# Used on homepage mini-block + /strony-www-dla-gabinetow.
+STRONY_WWW_FILES=get_env(
+    "STRONY_WWW_FILES",
+    ",".join([
+        "093e04c3-f2bf-4873-8c68-11b21ca827db.png",
+        "15a94403-4443-45ca-a857-eaeb9ddbe4b3.png",
+        "1c810e50-6aa5-4d30-95f1-eb083d301d18.png",
+        "24979659-83d7-4564-8406-7de234dbd27e.png",
+        "2c7c4b29-8665-4d8b-96f0-be441f164490.png",
+        "364022d8-c22e-485b-ac21-8bcc545c8022.png",
+        "61a4fb67-ef35-48dc-a177-e40e4df926f8.png",
+        "61da34fe-8da7-43ae-a34b-e98ca9316f4a.png",
+        "765eb34f-345e-491d-803e-c125ecf6a842.png",
+        "7e05e615-d1cb-4a45-bb63-2f29e4d7a541.png",
+        "8a161f3b-2764-4cfd-923a-004cd03707cd.png",
+        "c2b721e5-a9d7-48cf-876c-17a9e663301c.png",
+        "e0fe2c29-713f-4a8c-835a-cb743e4923b5.png",
+        "e37b8879-cff3-42eb-aa09-7395d7cc2880.png",
+        "fe03088b-bd8a-44e2-90a4-0f145d955655.png",
+    ])
+),
+
+
         # Optional external override for the HERO video ("video 1").
         # If set, the site will use this URL *only when the local file is missing*.
         # You can pass either:
@@ -594,25 +625,38 @@ def create_app() -> Flask:
         accessories_all = sorted([p for p in PRODUCTS if p.category == "accessories"], key=home_sort_key)
         # Homepage mini-portfolio (Strony WWW) – always show 4 images:
         # first two are pinned, the next two are taken from the folder.
-        strony_dir = APP_DIR / "static" / "img" / "strony_www"
+                # Strony WWW mini-block images (prefer Cloudflare R2, fallback to local static folder).
+        strony_base = (app.config.get("STRONY_WWW_BASE_URL") or "").rstrip("/")
+        strony_files_raw = app.config.get("STRONY_WWW_FILES") or ""
+        strony_files = [s.strip() for s in strony_files_raw.split(",") if s.strip()]
+
         pinned = [
             "e37b8879-cff3-42eb-aa09-7395d7cc2880.png",
             "765eb34f-345e-491d-803e-c125ecf6a842.png",
         ]
-        home_strony_images: list[str] = pinned.copy()
-        try:
-            if strony_dir.exists():
-                all_imgs = [
-                    p.name
-                    for p in strony_dir.iterdir()
-                    if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}
-                ]
-                all_imgs = sorted(all_imgs, key=lambda x: x.lower())
-                extra = [fn for fn in all_imgs if fn not in pinned]
-                home_strony_images = pinned + extra[:2]
-        except Exception:
-            # Non-fatal: keep pinned images only.
-            pass
+
+        home_strony_images = []
+
+        if strony_base and strony_files:
+            # Keep pinned first, then fill up to 4 images.
+            selected = [fn for fn in pinned if fn in strony_files]
+            extra = [fn for fn in strony_files if fn not in selected]
+            selected += extra[: max(0, 4 - len(selected))]
+            home_strony_images = [f"{strony_base}/{fn}" for fn in selected]
+        else:
+            # Fallback: try local /static/img/strony_www
+            try:
+                strony_dir = APP_DIR / "static" / "img" / "strony_www"
+                if strony_dir.exists():
+                    all_imgs = [p for p in strony_dir.iterdir() if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}]
+                    all_imgs = sorted(all_imgs, key=lambda p: p.name.lower())
+                    # prefer pinned (if present) then the rest
+                    local_pinned = [p for p in all_imgs if p.name in pinned]
+                    local_extra = [p for p in all_imgs if p.name not in pinned]
+                    selected = (local_pinned + local_extra)[:4]
+                    home_strony_images = [f"img/strony_www/{p.name}" for p in selected]
+            except Exception:
+                pass
 
         return render_template(
             "index.html",
@@ -689,24 +733,31 @@ def create_app() -> Flask:
         # WhatsApp number for wa.me links (digits only, incl. country code)
         whatsapp_number = re.sub(r"\D", "", app.config.get("CONTACT_PHONE", ""))
 
-        # Portfolio: automatically list all images from static/img/strony_www (no hardcoded filenames)
-        folder = APP_DIR / 'static' / 'img' / 'strony_www'
-        exts = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
-        files = []
-        if folder.exists():
-            for fp in folder.iterdir():
-                if not fp.is_file():
-                    continue
-                if fp.suffix.lower() not in exts:
-                    continue
-                lname = fp.name.lower()
-                if lname.startswith('readme') or lname.startswith('.'):
-                    continue
-                if lname.startswith('hero'):
-                    continue
-                files.append(fp)
-        files.sort(key=lambda x: x.name.lower())
-        portfolio_images = [f"img/strony_www/{fp.name}" for fp in files]
+                # Portfolio images: prefer Cloudflare R2, fallback to local /static/img/strony_www
+        strony_base = (app.config.get("STRONY_WWW_BASE_URL") or "").rstrip("/")
+        strony_files_raw = app.config.get("STRONY_WWW_FILES") or ""
+        strony_files = [s.strip() for s in strony_files_raw.split(",") if s.strip()]
+
+        if strony_base and strony_files:
+            portfolio_images = [f"{strony_base}/{fn}" for fn in strony_files]
+        else:
+            folder = APP_DIR / 'static' / 'img' / 'strony_www'
+            exts = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
+            files = []
+            if folder.exists():
+                for fp in folder.iterdir():
+                    if not fp.is_file():
+                        continue
+                    if fp.suffix.lower() not in exts:
+                        continue
+                    lname = fp.name.lower()
+                    if lname.startswith('readme') or lname.startswith('.'):
+                        continue
+                    if lname.startswith('hero'):
+                        continue
+                    files.append(fp)
+            files.sort(key=lambda x: x.name.lower())
+            portfolio_images = [f"img/strony_www/{fp.name}" for fp in files]
 
         return render_template(
             "strony_www.html",

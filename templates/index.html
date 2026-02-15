@@ -271,7 +271,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {% for fn in (home_strony_images or []) %}
             <div class="rounded-[26px] border border-black/10 bg-white/70 shadow-soft overflow-hidden">
-              <img loading="lazy" class="w-full h-auto" src="{{ url_for('static', filename='img/strony_www/' ~ fn) }}" alt="Wybrany projekt {{ loop.index }}">
+              <img loading="lazy" class="w-full h-auto" src="{{ fn if fn.startswith('http') else url_for('static', filename=fn) }}" alt="Wybrany projekt {{ loop.index }}">
             </div>
           {% endfor %}
         </div>
