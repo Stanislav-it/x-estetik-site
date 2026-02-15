@@ -6,17 +6,13 @@
 {% block content %}
 <!-- HERO -->
 <section id="hero" class="hero">
-  {% set hero_srcs = video_urls('video 1') %}
-<<<<<<< HEAD
-  <video id="heroVideo" class="hero-video" autoplay loop muted playsinline preload="auto" poster="{{ url_for('static', filename='img/poster-black.png') }}">
-=======
-  <video id="heroVideo" class="hero-video" autoplay loop muted playsinline preload="metadata" poster="{{ url_for('static', filename='img/hero_poster.jpg') }}">
->>>>>>> bec9881 (Update video 1 to smaller size)
+  {% set hero_srcs = video_urls('video 1') or ['https://pub-6b9f87ec02e04dc88c5b18144e88754a.r2.dev/video%201.mp4'] %}
+  <video id="heroVideo" class="hero-video is-ready" autoplay loop muted playsinline preload="auto" poster="{{ url_for('static', filename='img/poster-black.png') }}">
     {% for src in (hero_srcs or []) %}
       {% if src.startswith('http') %}
-        <source src="{{ src }}">
+        <source src="{{ src }}" type="video/mp4">
       {% else %}
-        <source src="{{ src }}{{ '&' if '?' in src else '?' }}v={{ STATIC_VERSION }}">
+        <source src="{{ src }}{{ '&' if '?' in src else '?' }}v={{ STATIC_VERSION }}" type="video/mp4">
       {% endif %}
     {% endfor %}
   </video>

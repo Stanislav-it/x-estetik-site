@@ -26,3 +26,7 @@ Wymagane nazwy (bez względu na rozszerzenie .mp4/.mov/.m4v/.webm):
 - video 22
 
 Uwaga: strona sama wykryje rozszerzenie pliku, więc możesz mieć np. 'video 1.mp4' albo 'video 1.mov'.
+
+
+HERO video (video 1) is served from R2:
+https://pub-6b9f87ec02e04dc88c5b18144e88754a.r2.dev/video%201.mp4

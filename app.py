@@ -3,9 +3,7 @@ from __future__ import annotations
 import os
 import re
 import sqlite3
-
 from html import escape as html_escape
-
 from urllib.parse import quote
 from dataclasses import dataclass
 from datetime import datetime
@@ -436,38 +434,36 @@ def create_app() -> Flask:
             "video 5.mp4,video 8.mp4,video 9.mp4,video 10.mp4,video 11.mp4,video 14.mp4,video 15.mp4,video 16.mp4,video 17.mp4,video 18.mp4,video 19.mp4,video 20.mp4,video 21.mp4",
         ),
 
-# R2 public folder base URL for Strony WWW portfolio images.
-# Example: https://<pub-...>.r2.dev/strony_www
-STRONY_WWW_BASE_URL=get_env(
-    "STRONY_WWW_BASE_URL",
-    get_env("FILMY_BASE_URL", "https://pub-6b9f87ec02e04dc88c5b18144e88754a.r2.dev").rstrip("/") + "/strony_www",
-),
+        # R2 public folder base URL for Strony WWW portfolio images.
+        # Example: https://<pub-...>.r2.dev/strony_www
+        STRONY_WWW_BASE_URL=get_env(
+            "STRONY_WWW_BASE_URL",
+            get_env("FILMY_BASE_URL", "https://pub-6b9f87ec02e04dc88c5b18144e88754a.r2.dev").rstrip("/") + "/strony_www",
+        ),
 
-# Comma-separated list of image object names in the R2 /strony_www folder.
-# Used on homepage mini-block + /strony-www-dla-gabinetow.
-STRONY_WWW_FILES=get_env(
-    "STRONY_WWW_FILES",
-    ",".join([
-        "093e04c3-f2bf-4873-8c68-11b21ca827db.png",
-        "15a94403-4443-45ca-a857-eaeb9ddbe4b3.png",
-        "1c810e50-6aa5-4d30-95f1-eb083d301d18.png",
-        "24979659-83d7-4564-8406-7de234dbd27e.png",
-        "2c7c4b29-8665-4d8b-96f0-be441f164490.png",
-        "364022d8-c22e-485b-ac21-8bcc545c8022.png",
-        "61a4fb67-ef35-48dc-a177-e40e4df926f8.png",
-        "61da34fe-8da7-43ae-a34b-e98ca9316f4a.png",
-        "765eb34f-345e-491d-803e-c125ecf6a842.png",
-        "7e05e615-d1cb-4a45-bb63-2f29e4d7a541.png",
-        "8a161f3b-2764-4cfd-923a-004cd03707cd.png",
-        "c2b721e5-a9d7-48cf-876c-17a9e663301c.png",
-        "e0fe2c29-713f-4a8c-835a-cb743e4923b5.png",
-        "e37b8879-cff3-42eb-aa09-7395d7cc2880.png",
-        "fe03088b-bd8a-44e2-90a4-0f145d955655.png",
-    ])
-),
-
-
-        # Optional external override for the HERO video ("video 1").
+        # Comma-separated list of image object names in the R2 /strony_www folder.
+        # Used on homepage mini-block + /strony-www-dla-gabinetow.
+        STRONY_WWW_FILES=get_env(
+            "STRONY_WWW_FILES",
+            ",".join([
+                "093e04c3-f2bf-4873-8c68-11b21ca827db.png",
+                "15a94403-4443-45ca-a857-eaeb9ddbe4b3.png",
+                "1c810e50-6aa5-4d30-95f1-eb083d301d18.png",
+                "24979659-83d7-4564-8406-7de234dbd27e.png",
+                "2c7c4b29-8665-4d8b-96f0-be441f164490.png",
+                "364022d8-c22e-485b-ac21-8bcc545c8022.png",
+                "61a4fb67-ef35-48dc-a177-e40e4df926f8.png",
+                "61da34fe-8da7-43ae-a34b-e98ca9316f4a.png",
+                "765eb34f-345e-491d-803e-c125ecf6a842.png",
+                "7e05e615-d1cb-4a45-bb63-2f29e4d7a541.png",
+                "8a161f3b-2764-4cfd-923a-004cd03707cd.png",
+                "c2b721e5-a9d7-48cf-876c-17a9e663301c.png",
+                "e0fe2c29-713f-4a8c-835a-cb743e4923b5.png",
+                "e37b8879-cff3-42eb-aa09-7395d7cc2880.png",
+                "fe03088b-bd8a-44e2-90a4-0f145d955655.png",
+            ]),
+        ),
+# Optional external override for the HERO video ("video 1").
         # If set, the site will prefer this URL for "video 1" (e.g. Cloudflare R2 public URL).
         # You can pass either:
         #   - a Google Drive share URL / Drive file id
@@ -1304,6 +1300,5 @@ def ensure_qr_codes(app: Flask) -> None:
 app = create_app()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "5050"))  # локально будет 5050, на сервере возьмёт PORT
-    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    # Port 5050 as requested.
+    app.run(host="0.0.0.0", port=5050, debug=True)
