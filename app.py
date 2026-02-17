@@ -1362,6 +1362,8 @@ def ensure_qr_codes(app: Flask) -> None:
 
 # ----------------------------- Run -----------------------------
 
+
+
 import os
 
 app = create_app()
