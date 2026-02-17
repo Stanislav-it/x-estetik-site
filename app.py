@@ -63,6 +63,10 @@ PRODUCT_PHOTO_BASE = {
     'x-shape': 'X-Shape',
     'x-v980': 'X-V980',
     'chlodzenie-powietrzem-iii': 'Chłodzenie powietrzem III',
+    'kartridze-pen-16-igl': 'accessories_pen_16',
+    'kartridze-rf-vacuum': 'accessories_rf_vacuum',
+    'kartridze-frax': 'accessories_frax',
+    'kapsulki-oxy': 'accessories_oxy_capsules',
 }
 
 PRODUCTS: List[Product] = [
@@ -342,6 +346,62 @@ PRODUCTS: List[Product] = [
         pages=list(range(86, 91)),
         badge="Top value",
     ),
+
+    # --- AKCESORIA (4) ---
+    Product(
+        slug="kartridze-pen-16-igl",
+        name="Kartridże do pena mikroigłowego 16 igłowe",
+        category="accessories",
+        tag="Akcesoria",
+        short="Jednorazowe kartridże 16-igłowe do pena mikroigłowego.",
+        bullets=[
+            "Cena: 35 zł - 1 sztuka.",
+        ],
+        price="35 zł - 1 sztuka",
+        pages=[],
+    ),
+    Product(
+        slug="kartridze-rf-vacuum",
+        name="Kartridże do RF mikroigłowy z vacuum",
+        category="accessories",
+        tag="Akcesoria",
+        short="Kartridże do RF mikroigłowego z systemem vacuum (różne warianty).",
+        bullets=[
+            "Kartridż nano - 59 zł",
+            "Kartridż 10 igłowy - 59 zł",
+            "Kartridż 25 igłowy - 59 zł",
+            "Kartridż 64 igłowy - 59 zł",
+        ],
+        price="59 zł",
+        pages=[],
+    ),
+    Product(
+        slug="kartridze-frax",
+        name="Kartridże do RF mikroigłowego ESTETIK FRAX",
+        category="accessories",
+        tag="Akcesoria",
+        short="Kartridże do RF mikroigłowego (ESTETIK FRAX) - różne końcówki.",
+        bullets=[
+            "Kartridż nano - 89 zł",
+            "Kartridż 10 pin - 89 zł",
+            "Kartridż 36 pin - 89 zł",
+            "Kartridż 64 pin - 89 zł",
+        ],
+        price="89 zł",
+        pages=[],
+    ),
+    Product(
+        slug="kapsulki-oxy",
+        name="Kapsułki do urządzeń typu Oxy",
+        category="accessories",
+        tag="Akcesoria",
+        short="Zestaw kapsułek do urządzeń typu Oxy.",
+        bullets=[
+            "Cena: 229 zł / opakowanie.",
+        ],
+        price="229 zł",
+        pages=[],
+    ),
 ]
 
 PRODUCTS_BY_SLUG: Dict[str, Product] = {p.slug: p for p in PRODUCTS}
@@ -350,23 +410,36 @@ PRODUCTS_BY_SLUG: Dict[str, Product] = {p.slug: p for p in PRODUCTS}
 # Any products not listed here fall back to alphabetical order after listed items.
 HOME_PAGE_ORDER: List[str] = [
     "x-levage-erbo",
-    "x-levage",
-    "x-fraxel-premium",
-    "x-fraxel",
+    "x-levage-volum",
+    "x-levage-thermo",
+    "x-levage-thermo-vacuum",
+    "x-levage-hifu",
+    "x-levage-hifu-8d",
+    "x-levage-hifu-12d",
+    "x-levage-hifu-15d",
+    "x-levage-hifu-22d",
+    "x-levage-hifu-4d",
+    "emax-co2",
     "depimax",
-    "x-hair",
-    "x-boss",
-    "x-v980",
-    "regen-lift",
-    "x-contour-krio",
-    "x-shape",
-    "ems-formax",
-    "estetik-frax",
+    "eme-ipl",
+    "radiofrequency",
+    "hydrafacial",
+    "pico-laser",
+    "hifu-vaginal",
+    "hifu-lipoline",
+    "ultrasonic-hifu",
+    "shockwave",
+    "cryolipolysis",
+    # --- HI-TECH ---
     "lumera-estetik",
-    "x-derma",
-    "x-blue-pen",
+    "estetik-frax",
     "biopen-q2",
     "chlodzenie-powietrzem-iii",
+    # --- AKCESORIA ---
+    "kartridze-pen-16-igl",
+    "kartridze-rf-vacuum",
+    "kartridze-frax",
+    "kapsulki-oxy",
 ]
 
 HOME_PAGE_ORDER_MAP: Dict[str, int] = {slug: i for i, slug in enumerate(HOME_PAGE_ORDER)}
@@ -405,7 +478,7 @@ def create_app() -> Flask:
         SITE_NAME=get_env("SITE_NAME", "X‑Estetik"),
         BRAND=get_env("BRAND", "X‑Estetik"),
         CONTACT_EMAIL=get_env("CONTACT_EMAIL", "biuro.x-estetik@op.pl"),
-        CONTACT_PHONE=get_env("CONTACT_PHONE", "+48 723 698 910"),
+        CONTACT_PHONE=get_env("CONTACT_PHONE", "+48 518 151 673"),
         CONTACT_NOTE=get_env("CONTACT_NOTE", "Odpowiadamy w dni robocze."),
         INSTAGRAM_URL=get_env("INSTAGRAM_URL", "https://www.instagram.com/xestetik/"),
         INSTAGRAM_HANDLE=get_env("INSTAGRAM_HANDLE", "@xestetik"),
@@ -718,16 +791,9 @@ def create_app() -> Flask:
         ]
         socials = [s for s in socials if s.get("url")]
         return render_template("social.html", socials=socials)
-
-
-
-
     @app.get("/strony-www-dla-gabinetow")
     def strony_www_dla_gabinetow():
-        # WhatsApp number for wa.me links (digits only, incl. country code)
-        whatsapp_number = re.sub(r"\D", "", app.config.get("CONTACT_PHONE", ""))
-
-                # Portfolio images: prefer Cloudflare R2, fallback to local /static/img/strony_www
+        # Portfolio images: prefer Cloudflare R2, fallback to local /static/img/strony_www
         strony_base = (app.config.get("STRONY_WWW_BASE_URL") or "").rstrip("/")
         strony_files_raw = app.config.get("STRONY_WWW_FILES") or ""
         strony_files = [s.strip() for s in strony_files_raw.split(",") if s.strip()]
@@ -755,9 +821,8 @@ def create_app() -> Flask:
 
         return render_template(
             "strony_www.html",
-            title="Strony WWW dla gabinetów",
-            meta_description="Strony WWW i kampanie reklamowe dla gabinetów beauty. Portfolio realizacji i kontakt WhatsApp.",
-            whatsapp_number=whatsapp_number,
+            title="Cyfrowe wsparcie salonów",
+            meta_description="Cyfrowe wsparcie salonów beauty: strony WWW i kampanie reklamowe. Kontakt e‑mail i telefon.",
             portfolio_images=portfolio_images,
         )
 

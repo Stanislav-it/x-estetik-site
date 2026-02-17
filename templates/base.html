@@ -36,7 +36,7 @@
         <a class="site-nav-link" href="{{ url_for('reviews') }}">Opinie</a>
         <a class="site-nav-link" href="{{ url_for('filmy') }}">Filmy</a>
         <a class="site-nav-link" href="{{ url_for('social') }}" title="Media społecznościowe">Media</a>
-        <a class="site-nav-link" href="{{ url_for('strony_www_dla_gabinetow') }}">Strony WWW</a>
+        <a class="site-nav-link" href="{{ url_for('strony_www_dla_gabinetow') }}">Cyfrowe wsparcie salonów</a>
         <a class="site-nav-link" href="{{ url_for('index') }}#kontakt">Kontakt</a>
       </nav>
 
@@ -109,7 +109,7 @@
           <div>E‑mail: <a class="underline" href="mailto:{{ CONTACT_EMAIL }}">{{ CONTACT_EMAIL }}</a></div>
           {% endif %}
           {% if CONTACT_PHONE %}
-          <div>Telefon/WhatsApp: <a class="underline" href="tel:{{ CONTACT_PHONE|replace(' ', '') }}">{{ CONTACT_PHONE }}</a></div>
+          <div>Telefon: <a class="underline" href="tel:{{ CONTACT_PHONE|replace(' ', '') }}">{{ CONTACT_PHONE }}</a></div>
           {% endif %}
           {% if INSTAGRAM_HANDLE %}
           <div>Instagram: <a class="underline" href="{{ INSTAGRAM_URL }}" target="_blank" rel="noreferrer">{{ INSTAGRAM_HANDLE }}</a></div>
@@ -209,7 +209,7 @@
         <a class="mm-item" href="{{ url_for('accessories') }}">Akcesoria</a>
         {% endif %}
         <a class="mm-item" href="{{ url_for('gielda') }}">Giełda Sprzętu Kosmetycznego</a>
-        <a class="mm-item" href="{{ url_for('strony_www_dla_gabinetow') }}">Strony WWW</a>
+        <a class="mm-item" href="{{ url_for('strony_www_dla_gabinetow') }}">Cyfrowe wsparcie salonów</a>
         <a class="mm-item" href="{{ url_for('finansowanie') }}">Finansowanie</a>
         <a class="mm-item" href="{{ url_for('reviews') }}">Opinie</a>
         <a class="mm-item" href="{{ url_for('filmy') }}">Filmy</a>

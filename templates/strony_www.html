@@ -2,10 +2,10 @@
 
 {% block head %}
 <style>
-  /* Strony WWW — “droższy” look: miękkie cienie + głębia (z-space) */
+  /* Cyfrowe wsparcie salonów — czysto: nagłówek + split (kontakt | zdjęcia) */
   .sw-hero {
     position: relative;
-    padding: 56px 0 52px;
+    padding: 56px 0 42px;
     background:
       radial-gradient(900px 420px at 50% 0%, rgba(15, 23, 42, 0.10), transparent 60%),
       radial-gradient(700px 320px at 20% 15%, rgba(2, 132, 199, 0.06), transparent 60%),
@@ -23,45 +23,41 @@
   }
   .sw-hero > * { position: relative; z-index: 1; }
 
-  .sw-cta {
-    box-shadow:
-      0 22px 50px rgba(15, 23, 42, 0.26),
-      0 8px 16px rgba(15, 23, 42, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    transform: translateZ(0);
-    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
-  }
-  .sw-cta:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 30px 70px rgba(15, 23, 42, 0.30),
-      0 10px 22px rgba(15, 23, 42, 0.14),
-      inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  }
-  .sw-cta:active { transform: translateY(0px) scale(0.99); }
-
-  .sw-cta-secondary{
-    border: 1px solid rgba(15, 23, 42, 0.14);
-    background: rgba(255,255,255,0.70);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 14px 38px rgba(15,23,42,0.10), 0 6px 14px rgba(15,23,42,0.06);
-    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
-  }
-  .sw-cta-secondary:hover{
-    transform: translateY(-2px);
-    box-shadow: 0 20px 52px rgba(15,23,42,0.12), 0 8px 18px rgba(15,23,42,0.07);
-    background: rgba(255,255,255,0.85);
-  }
-  .sw-cta-secondary:active{ transform: translateY(0px) scale(0.99); }
-
-  .sw-portfolio {
-    padding: 48px 0 100px;
+  .sw-split{
+    padding: 42px 0 58px;
     background: #ffffff;
   }
-  .sw-grid {
-    perspective: 1200px;
+
+  .sw-photo-panel{
+    border-radius: 28px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 22px;
+    height: 100%;
   }
+
+  .sw-mini-grid{
+    margin-top: 18px;
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .sw-mini-card{
+    border-radius: 22px;
+    overflow:hidden;
+    border: 1px solid rgba(15,23,42,0.10);
+    background: rgba(255,255,255,0.86);
+    box-shadow: 0 20px 52px rgba(15,23,42,0.10), 0 8px 18px rgba(15,23,42,0.06);
+  }
+  .sw-mini-card img{ width:100%; height:auto; display:block; }
+
+  .sw-portfolio {
+    padding: 36px 0 100px;
+    background: #ffffff;
+  }
+  .sw-grid { perspective: 1200px; }
   .sw-card {
     position: relative;
     border-radius: 28px;
@@ -93,36 +89,108 @@
   .sw-card img {
     display: block;
     width: 100%;
-    height: auto; /* nie przycinamy — “potok fotek” */
+    height: auto; /* nie przycinamy */
   }
 
   @media (max-width: 768px) {
-    .sw-hero { padding: 72px 0 52px; }
+    .sw-hero { padding: 66px 0 40px; }
+    .sw-split{ padding: 32px 0 44px; }
     .sw-card:hover { transform: translateY(-4px); }
+    .sw-mini-grid{ gap: 10px; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <section class="sw-hero">
-	  <div class="mx-auto max-w-[980px] text-center px-5 md:px-8"><h1 class="text-4xl md:text-6xl font-extrabold leading-[1.02] text-slate-900">
-	      Tworzymy strony internetowe&nbsp;i kampanie reklamowe,<br class="hidden md:block">
-	      które sprzedają zabiegi.
-	    </h1>
+  <div class="mx-auto max-w-[980px] text-center px-5 md:px-8">
+    <h1 class="text-4xl md:text-6xl font-extrabold leading-[1.02] text-slate-900">
+      Tworzymy strony internetowe&nbsp;i kampanie reklamowe,<br class="hidden md:block">
+      które sprzedają zabiegi.
+    </h1>
 
     <p class="mt-4 text-slate-600 text-base md:text-lg">
       Szybkie i niedrogie strony oraz sklepy internetowe dla branży beauty — gotowe do startu w krótkim czasie.
     </p>
 
-    <div class="mt-6 mx-auto max-w-[560px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <a class="sw-cta inline-flex items-center justify-center rounded-full bg-slate-900 px-7 py-3 text-white font-semibold hover:bg-slate-800"
-         href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener">
-        Napisz na WhatsApp
-      </a>
-      <a class="sw-cta-secondary inline-flex items-center justify-center rounded-full px-7 py-3 font-semibold text-slate-900"
-         href="#portfolio">
-        Wybrane realizacje
-      </a>
+    <p class="mt-5 text-sm md:text-base text-slate-700">
+      {% if CONTACT_EMAIL %}
+        <a class="underline" href="mailto:{{ CONTACT_EMAIL }}">{{ CONTACT_EMAIL }}</a>
+      {% endif %}
+      {% if CONTACT_EMAIL and CONTACT_PHONE %}
+        <span class="mx-2 text-slate-400">•</span>
+      {% endif %}
+      {% if CONTACT_PHONE %}
+        <a class="underline" href="tel:{{ CONTACT_PHONE|replace(' ', '') }}">{{ CONTACT_PHONE }}</a>
+      {% endif %}
+    </p>
+  </div>
+</section>
+
+<section class="sw-split" id="kontakt">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+
+      <!-- LEWA: kontakt + formularz -->
+      <div class="contact-panel">
+        <div class="section-kicker">KONTAKT</div>
+        <h2 class="section-title mt-2">Napisz lub zadzwoń</h2>
+        <p class="mt-3 prose-muted">Krótko opisz czego potrzebujesz — wrócimy z odpowiedzią i propozycją kolejnych kroków.</p>
+
+        <div class="mt-4 text-sm text-slate-700 space-y-2">
+          {% if CONTACT_EMAIL %}
+            <div>E‑mail: <a class="underline" href="mailto:{{ CONTACT_EMAIL }}">{{ CONTACT_EMAIL }}</a></div>
+          {% endif %}
+          {% if CONTACT_PHONE %}
+            <div>Telefon: <a class="underline" href="tel:{{ CONTACT_PHONE|replace(' ', '') }}">{{ CONTACT_PHONE }}</a></div>
+          {% endif %}
+        </div>
+
+        <form method="post" action="{{ url_for('lead') }}" class="contact-form mt-7">
+          <div class="grid gap-3">
+            <input name="name" placeholder="Imię i nazwisko" class="input" required>
+            <input name="phone" placeholder="Telefon" class="input">
+            <input name="email" placeholder="E‑mail" class="input" required>
+            <textarea name="message" placeholder="Wiadomość" rows="5" class="input" required></textarea>
+            <button class="btn-primary w-fit" type="submit">Wyślij wiadomość</button>
+
+            <label class="mt-1 flex items-start gap-3 text-xs text-slate-600 leading-relaxed">
+              <input type="checkbox" name="privacy_accept" value="1" required class="mt-1">
+              <span>
+                Zapoznałem(-am) się z <a class="underline" href="{{ url_for('policy', slug='privacy') }}" target="_blank" rel="noreferrer">Polityką prywatności</a> i akceptuję jej postanowienia.
+              </span>
+            </label>
+            <div class="text-xs text-slate-500 leading-relaxed">
+              Administratorem danych jest {{ SITE_NAME }}. Dane przetwarzamy wyłącznie w celu odpowiedzi na zapytanie.
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- PRAWA: zdjęcia obok formularza -->
+      <div class="sw-photo-panel">
+        <div class="section-kicker">REALIZACJE</div>
+        <h2 class="section-title mt-2">Wybrane zdjęcia</h2>
+        <p class="mt-3 prose-muted">Kilka przykładów obok formularza — wszystkie realizacje niżej.</p>
+
+        {% if portfolio_images %}
+          <div class="sw-mini-grid">
+            {% for img in portfolio_images[:4] %}
+              <div class="sw-mini-card">
+                <img loading="lazy" src="{{ img if img.startswith('http') else url_for('static', filename=img) }}" alt="Realizacja {{ loop.index }}" />
+              </div>
+            {% endfor %}
+          </div>
+          <div class="mt-5 text-sm text-slate-700">
+            <a class="underline" href="#portfolio">Zobacz wszystkie realizacje ↓</a>
+          </div>
+        {% else %}
+          <div class="mt-5 rounded-[22px] border border-black/10 bg-white p-5 text-sm text-slate-600">
+            Dodaj zdjęcia do folderu <b>static/img/strony_www</b> (png/jpg/webp), a pojawią się tutaj automatycznie.
+          </div>
+        {% endif %}
+      </div>
+
     </div>
   </div>
 </section>
@@ -131,18 +199,17 @@
   <div class="mx-auto max-w-[1180px] px-5 md:px-8">
     <div class="sw-grid grid grid-cols-1 md:grid-cols-2 gap-10">
       {% for img in portfolio_images %}
-      <div class="sw-card">
-        <img loading="lazy" src="{{ img if img.startswith('http') else url_for('static', filename=img) }}" alt="Realizacja {{ loop.index }}" />
-      </div>
+        <div class="sw-card">
+          <img loading="lazy" src="{{ img if img.startswith('http') else url_for('static', filename=img) }}" alt="Realizacja {{ loop.index }}" />
+        </div>
       {% endfor %}
 
       {% if not portfolio_images %}
-      <div class="md:col-span-2 rounded-[28px] border border-black/10 bg-white p-8 text-center text-slate-600">
-        Dodaj zdjęcia do folderu <b>static/img/strony_www</b> (png/jpg/webp), a pojawią się tutaj automatycznie.
-      </div>
+        <div class="md:col-span-2 rounded-[28px] border border-black/10 bg-white p-8 text-center text-slate-600">
+          Dodaj zdjęcia do folderu <b>static/img/strony_www</b> (png/jpg/webp), a pojawią się tutaj automatycznie.
+        </div>
       {% endif %}
     </div>
   </div>
 </section>
-
 {% endblock %}

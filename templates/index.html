@@ -251,15 +251,15 @@
     <div class="rounded-[32px] border border-black/10 bg-white/35 backdrop-blur-[10px] overflow-hidden">
       <div class="grid gap-10 lg:grid-cols-2 p-8 md:p-12 items-center">
         <div>
-          <div class="section-kicker">STRONY WWW</div>
-          <h2 class="section-title mt-3">Szybkie i niedrogie strony WWW dla gabinetów beauty</h2>
+          <div class="section-kicker">CYFROWE WSPARCIE SALONÓW</div>
+          <h2 class="section-title mt-3">Cyfrowe wsparcie salonów beauty</h2>
           <p class="mt-4 text-slate-700 leading-relaxed max-w-[620px]">
             Projekt i wdrożenie pod klucz: szybkie i niedrogie strony WWW oraz sklepy internetowe.
             Estetycznie i z naciskiem na konwersję.
           </p>
 
           <div class="mt-7 flex flex-col sm:flex-row sm:items-center gap-3">
-            <a class="btn-primary" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener">Napisz na WhatsApp</a>
+            {% if CONTACT_EMAIL %}<a class="btn-primary" href="mailto:{{ CONTACT_EMAIL }}">Napisz e‑mail</a>{% endif %}{% if CONTACT_PHONE %}<a class="btn-ghost" href="tel:{{ CONTACT_PHONE|replace(' ', '') }}">Zadzwoń</a>{% endif %}
             <a class="btn-ghost" href="{{ url_for('strony_www_dla_gabinetow') }}">Wybrane projekty</a>
           </div>
         </div>
