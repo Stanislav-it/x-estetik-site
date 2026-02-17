@@ -1365,5 +1365,8 @@ def ensure_qr_codes(app: Flask) -> None:
 app = create_app()
 
 if __name__ == "__main__":
-    # Port 5050 as requested.
+    # Render/production must listen on $PORT. Locally it falls back to 5050.
+    port = int(os.environ.get("PORT", "5050"))
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug)
     app.run(host="0.0.0.0", port=5050, debug=True)
