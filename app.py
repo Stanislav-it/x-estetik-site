@@ -477,6 +477,12 @@ def create_app() -> Flask:
         STATIC_VERSION=get_env("STATIC_VERSION", str(int(datetime.utcnow().timestamp()))),
         SITE_NAME=get_env("SITE_NAME", "X‑Estetik"),
         BRAND=get_env("BRAND", "X‑Estetik"),
+
+        # Dane firmy (stopka / polityki / kontakt)
+        COMPANY_NAME=get_env("COMPANY_NAME", "Mazur Estetik Dariusz Oboleński"),
+        COMPANY_NIP=get_env("COMPANY_NIP", "5222401280"),
+        COMPANY_ADDRESS=get_env("COMPANY_ADDRESS", "Smardzewska 8c/21\n04-742 Warszawa"),
+
         CONTACT_EMAIL=get_env("CONTACT_EMAIL", "biuro.x-estetik@op.pl"),
         CONTACT_PHONE=get_env("CONTACT_PHONE", "+48 518 151 673"),
         CONTACT_NOTE=get_env("CONTACT_NOTE", "Odpowiadamy w dni robocze."),
@@ -656,12 +662,22 @@ def create_app() -> Flask:
             urls = resolve_video_urls(video_base)
             return urls[0] if urls else ""
 
+        whatsapp_number = re.sub(r"\D", "", app.config.get("CONTACT_PHONE", ""))
+        whatsapp_url = f"https://wa.me/{whatsapp_number}" if whatsapp_number else ""
+
         return {
             "SITE_NAME": app.config["SITE_NAME"],
             "BRAND": app.config["BRAND"],
             "CONTACT_EMAIL": app.config["CONTACT_EMAIL"],
             "CONTACT_PHONE": app.config["CONTACT_PHONE"],
             "CONTACT_NOTE": app.config.get("CONTACT_NOTE", ""),
+
+            "COMPANY_NAME": app.config.get("COMPANY_NAME", ""),
+            "COMPANY_NIP": app.config.get("COMPANY_NIP", ""),
+            "COMPANY_ADDRESS": app.config.get("COMPANY_ADDRESS", ""),
+
+            "WHATSAPP_URL": whatsapp_url,
+
             "INSTAGRAM_URL": app.config.get("INSTAGRAM_URL", ""),
             "INSTAGRAM_HANDLE": app.config.get("INSTAGRAM_HANDLE", ""),
             "FACEBOOK_URL": app.config.get("FACEBOOK_URL", ""),

@@ -317,6 +317,18 @@
           </div>
         {% endif %}
 
+        {% if COMPANY_NAME %}
+          <div class="mt-4 text-sm text-slate-700 leading-relaxed">
+            <div class="text-xs font-semibold tracking-[0.14em] uppercase text-slate-500">Dane firmy</div>
+            <div class="mt-2">
+              <div class="font-medium">{{ COMPANY_NAME }}</div>
+              {% if COMPANY_NIP %}<div>NIP: {{ COMPANY_NIP }}</div>{% endif %}
+              {% if COMPANY_ADDRESS %}<div>{{ COMPANY_ADDRESS|replace("
+", "<br>")|safe }}</div>{% endif %}
+            </div>
+          </div>
+        {% endif %}
+
         <form method="post" action="{{ url_for('lead') }}" class="contact-form mt-8">
           <div class="grid gap-3">
             <input name="name" placeholder="Imię i nazwisko" class="input" required>
@@ -332,7 +344,7 @@
               </span>
             </label>
             <div class="text-xs text-slate-500 leading-relaxed">
-              Administratorem danych jest {{ SITE_NAME }}. Dane przetwarzamy wyłącznie w celu odpowiedzi na zapytanie. Szczegóły: <a class="underline" href="{{ url_for('policy', slug='privacy') }}" target="_blank" rel="noreferrer">Polityka prywatności</a>.
+              Administratorem danych jest {{ COMPANY_NAME or SITE_NAME }}. Dane przetwarzamy wyłącznie w celu odpowiedzi na zapytanie. Szczegóły: <a class="underline" href="{{ url_for('policy', slug='privacy') }}" target="_blank" rel="noreferrer">Polityka prywatności</a>.
             </div>
           </div>
         </form>
