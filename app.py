@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import os
 import re
+import json
+import smtplib
 import sqlite3
 from html import escape as html_escape
 from urllib.parse import quote
+from email.message import EmailMessage
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from flask import Flask, abort, flash, redirect, render_template, request, send_from_directory, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, send_from_directory, session, url_for
 
 APP_DIR = Path(__file__).resolve().parent
 
@@ -20,6 +23,144 @@ APP_DIR = Path(__file__).resolve().parent
 def get_env(name: str, default: str = "") -> str:
     v = os.environ.get(name, "").strip()
     return v if v else default
+
+
+
+
+def parse_bool(v: str) -> bool:
+    s = (v or '').strip().lower()
+    return s in {'1','true','yes','y','on','t'}
+
+
+def safe_ts(ts: str) -> str:
+    """Return a filesystem-safe timestamp string."""
+    s = (ts or '').strip()
+    # e.g. 2026-02-24T15:05:33 -> 20260224_150533
+    s = s.replace('T', '_').replace(':', '').replace('-', '')
+    s = re.sub(r'[^0-9_]+', '', s)
+    return s or str(int(datetime.utcnow().timestamp()))
+
+
+def mailto_link(to_email: str, subject: str = '', body: str = '') -> str:
+    to_email = (to_email or '').strip()
+    if not to_email:
+        return ''
+    q = []
+    if subject:
+        q.append('subject=' + quote(subject))
+    if body:
+        q.append('body=' + quote(body))
+    return f"mailto:{to_email}" + (('?' + '&'.join(q)) if q else '')
+
+
+def gmail_compose_link(to_email: str, subject: str = '', body: str = '') -> str:
+    to_email = (to_email or '').strip()
+    if not to_email:
+        return ''
+    base = 'https://mail.google.com/mail/?view=cm&fs=1'
+    q = [f'to={quote(to_email)}']
+    if subject:
+        q.append('su=' + quote(subject))
+    if body:
+        q.append('body=' + quote(body))
+    return base + '&' + '&'.join(q)
+
+
+def archive_lead_to_disk(app: Flask, *, lead_id: int, created_at: str, name: str, email: str, phone: str, message: str, source_path: str) -> None:
+    """Best-effort archiving of leads to JSON/JSONL on disk."""
+    leads_dir = (app.config.get('LEADS_DIR') or '').strip()
+    jsonl_path = (app.config.get('LEADS_JSONL_PATH') or '').strip()
+    if not leads_dir and not jsonl_path:
+        return
+
+    payload = {
+        'id': lead_id,
+        'created_at': created_at,
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'message': message,
+        'source_path': source_path,
+        'site': app.config.get('SITE_NAME', ''),
+    }
+
+    ts = safe_ts(created_at)
+
+    try:
+        if leads_dir:
+            Path(leads_dir).mkdir(parents=True, exist_ok=True)
+            out = Path(leads_dir) / f'lead_{lead_id}_{ts}.json'
+            out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
+    except Exception:
+        pass
+
+    try:
+        if jsonl_path:
+            p = Path(jsonl_path)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            with p.open('a', encoding='utf-8') as f:
+                f.write(json.dumps(payload, ensure_ascii=False) + '\n')
+    except Exception:
+        pass
+
+
+def send_lead_email(app: Flask, *, lead_id: int, created_at: str, name: str, email: str, phone: str, message: str, source_path: str) -> bool:
+    """Send a lead notification e-mail via SMTP. Best-effort; returns True on success."""
+    mail_to = (app.config.get('MAIL_TO') or '').strip()
+    smtp_host = (app.config.get('SMTP_HOST') or '').strip()
+    smtp_user = (app.config.get('SMTP_USER') or '').strip()
+    smtp_pass = (app.config.get('SMTP_PASS') or '').strip()
+    smtp_from = (app.config.get('SMTP_FROM') or '').strip() or smtp_user
+    smtp_port = int(app.config.get('SMTP_PORT') or 587)
+    smtp_tls = bool(app.config.get('SMTP_TLS'))
+
+    if not (mail_to and smtp_host and smtp_from):
+        return False
+
+    subject = f"Nowa wiadomość — {app.config.get('BRAND', app.config.get('SITE_NAME', ''))}"
+    body_lines = [
+        f"ID: {lead_id}",
+        f"Data (UTC): {created_at}",
+        f"Imię: {name}",
+        f"E-mail: {email}",
+        f"Telefon: {phone or '-'}",
+        f"Źródło: {source_path or '-'}",
+        '',
+        'Wiadomość:',
+        message,
+        '',
+        '---',
+        f"Serwis: {app.config.get('SITE_NAME','')} ({app.config.get('BRAND','')})",
+    ]
+
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = smtp_from
+    msg['To'] = mail_to
+    msg.set_content('\n'.join(body_lines))
+
+    # Optional: archive .eml
+    try:
+        archive_dir = (app.config.get('MAIL_ARCHIVE_DIR') or '').strip()
+        if archive_dir:
+            Path(archive_dir).mkdir(parents=True, exist_ok=True)
+            eml = Path(archive_dir) / f'lead_{lead_id}_{safe_ts(created_at)}.eml'
+            eml.write_bytes(msg.as_bytes())
+    except Exception:
+        pass
+
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=20) as server:
+            server.ehlo()
+            if smtp_tls:
+                server.starttls()
+                server.ehlo()
+            if smtp_user and smtp_pass:
+                server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+        return True
+    except Exception:
+        return False
 
 
 # ----------------------------- Data model -----------------------------
@@ -472,6 +613,15 @@ CATEGORY_META = {
 
 def create_app() -> Flask:
     app = Flask(__name__)
+
+    # Storage base (Render persistent disk is commonly mounted at /var/data).
+    data_dir_raw = get_env("DATA_DIR", "")
+    data_base = Path(data_dir_raw) if data_dir_raw else (APP_DIR / "instance")
+    default_db_path = str(data_base / "app.db")
+    default_leads_dir = str(data_base / "leads")
+    default_leads_jsonl = str(data_base / "leads.jsonl")
+    default_mail_archive_dir = str(data_base / "mail_archive")
+
     app.config.update(
         SECRET_KEY=get_env("SECRET_KEY", "dev-secret-key-change-me"),
         STATIC_VERSION=get_env("STATIC_VERSION", str(int(datetime.utcnow().timestamp()))),
@@ -501,7 +651,26 @@ def create_app() -> Flask:
         FACEBOOK_TULOWY_ERBO_HANDLE=get_env("FACEBOOK_TULOWY_ERBO_HANDLE", "laser tulowy + erbowo szklany"),
         TIKTOK_URL=get_env("TIKTOK_URL", "https://www.tiktok.com/"),
         TIKTOK_HANDLE=get_env("TIKTOK_HANDLE", "TikTok"),
-        DB_PATH=get_env("DB_PATH", str(APP_DIR / "instance" / "app.db")),
+        DATA_DIR=data_dir_raw,
+        DB_PATH=get_env("DB_PATH", default_db_path),
+
+        # Leads archive (optional)
+        LEADS_DIR=get_env("LEADS_DIR", default_leads_dir),
+        LEADS_JSONL_PATH=get_env("LEADS_JSONL_PATH", default_leads_jsonl),
+        MAIL_ARCHIVE_DIR=get_env("MAIL_ARCHIVE_DIR", default_mail_archive_dir),
+
+        # Admin (optional)
+        ADMIN_USER=get_env("ADMIN_USER", "admin"),
+        ADMIN_PASS=get_env("ADMIN_PASS", "admin"),
+
+        # Email notifications (optional)
+        MAIL_TO=get_env("MAIL_TO", get_env("CONTACT_EMAIL", "")),
+        SMTP_HOST=get_env("SMTP_HOST", ""),
+        SMTP_PORT=int(get_env("SMTP_PORT", "587") or "587"),
+        SMTP_TLS=parse_bool(get_env("SMTP_TLS", "1")),
+        SMTP_USER=get_env("SMTP_USER", ""),
+        SMTP_PASS=get_env("SMTP_PASS", ""),
+        SMTP_FROM=get_env("SMTP_FROM", ""),
 
         # R2 public bucket base URL for /filmy showcase clips.
         # Example: https://<pub-...>.r2.dev
@@ -902,9 +1071,90 @@ def create_app() -> Flask:
             flash("Zaznacz zgodę na Politykę prywatności, aby wysłać formularz.", "error")
             return redirect(request.referrer or url_for("index") + "#kontakt")
 
-        save_lead(app, name=name, email=email, phone=phone, message=message, path=(request.referrer or ""))
-        flash("Dziękujemy! Wiadomość została zapisana. Skontaktujemy się najszybciej jak to możliwe.", "success")
+        lead_id, created_at = save_lead(app, name=name, email=email, phone=phone, message=message, path=(request.referrer or ""))
+        archive_lead_to_disk(app, lead_id=lead_id, created_at=created_at, name=name, email=email, phone=phone, message=message, source_path=(request.referrer or ""))
+        sent = send_lead_email(app, lead_id=lead_id, created_at=created_at, name=name, email=email, phone=phone, message=message, source_path=(request.referrer or ""))
+
+        if sent:
+            flash("Dziękujemy! Wiadomość została wysłana. Skontaktujemy się najszybciej jak to możliwe.", "success")
+        else:
+            flash("Dziękujemy! Wiadomość została zapisana. Skontaktujemy się najszybciej jak to możliwe.", "success")
         return redirect((request.referrer or url_for("index")) + "#kontakt")
+
+
+    # ----------------------------- Admin (optional) -----------------------------
+
+    def require_admin():
+        if not session.get("is_admin"):
+            return redirect(url_for("admin_login", next=request.path))
+        return None
+
+    @app.get("/admin")
+    def admin_root():
+        ra = require_admin()
+        if ra:
+            return ra
+        return redirect(url_for("admin_notifications"))
+
+    @app.get("/admin/login")
+    def admin_login():
+        return render_template("admin/login.html", next=(request.args.get("next") or ""))
+
+    @app.post("/admin/login")
+    def admin_login_post():
+        user = (request.form.get("user") or "").strip()
+        pw = (request.form.get("password") or "").strip()
+
+        if user == (app.config.get("ADMIN_USER") or "") and pw == (app.config.get("ADMIN_PASS") or ""):
+            session["is_admin"] = True
+            nxt = (request.form.get("next") or "").strip()
+            return redirect(nxt or url_for("admin_notifications"))
+
+        flash("Błędny login lub hasło.", "error")
+        return redirect(url_for("admin_login"))
+
+    @app.get("/admin/logout")
+    def admin_logout():
+        session.pop("is_admin", None)
+        flash("Wylogowano.", "success")
+        return redirect(url_for("index"))
+
+    @app.get("/admin/notifications")
+    def admin_notifications():
+        ra = require_admin()
+        if ra:
+            return ra
+
+        q = (request.args.get("q") or "").strip()
+        page = int((request.args.get("page") or "1").strip() or 1)
+        per_page = 50
+        offset = max(0, page - 1) * per_page
+
+        where_sql = ""
+        params: list = []
+        if q:
+            ql = f"%{q.lower()}%"
+            where_sql = " WHERE lower(name) LIKE ? OR lower(email) LIKE ? OR lower(phone) LIKE ? OR lower(message) LIKE ?"
+            params = [ql, ql, ql, ql]
+
+        with get_db(app) as conn:
+            total = conn.execute(f"SELECT COUNT(1) AS c FROM leads{where_sql}", params).fetchone()["c"]
+            rows = conn.execute(
+                f"SELECT * FROM leads{where_sql} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?",
+                params + [per_page, offset],
+            ).fetchall()
+
+        total_pages = max(1, (total + per_page - 1) // per_page)
+        leads = [dict(r) for r in rows]
+
+        return render_template(
+            "admin/notifications.html",
+            leads=leads,
+            q=q,
+            page=page,
+            total_pages=total_pages,
+            total=total,
+        )
 
     @app.get("/polityki/<slug>")
     def policy(slug: str):
@@ -1329,16 +1579,19 @@ def init_db(app: Flask) -> None:
         conn.commit()
 
 
-def save_lead(app: Flask, name: str, email: str, phone: str, message: str, path: str) -> None:
+def save_lead(app: Flask, name: str, email: str, phone: str, message: str, path: str) -> tuple[int, str]:
+    created_at = datetime.utcnow().isoformat(timespec="seconds")
     with get_db(app) as conn:
-        conn.execute(
+        cur = conn.execute(
             """
             INSERT INTO leads (created_at, name, email, phone, message, source_path)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (datetime.utcnow().isoformat(timespec="seconds"), name, email, phone, message, path),
+            (created_at, name, email, phone, message, path),
         )
+        lead_id = int(cur.lastrowid)
         conn.commit()
+    return lead_id, created_at
 
 
 # ----------------------------- Assets (QR) -----------------------------

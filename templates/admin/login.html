@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="paper-section">
+  <div class="mx-auto max-w-[520px] px-5 md:px-8 py-16">
+    <div class="rounded-3xl border border-black/10 bg-white/70 shadow-sm p-8">
+      <div class="text-xs font-semibold tracking-[0.14em] uppercase text-slate-500">ADMIN</div>
+      <h1 class="text-2xl md:text-3xl font-semibold mt-2">Logowanie</h1>
+      <p class="mt-3 text-sm text-slate-600 leading-relaxed">Dostęp do powiadomień z formularza kontaktowego.</p>
+
+      <form method="post" action="{{ url_for('admin_login_post') }}" class="contact-form mt-7 grid gap-3">
+        <input class="input" name="user" placeholder="Login" autocomplete="username" required>
+        <input class="input" type="password" name="password" placeholder="Hasło" autocomplete="current-password" required>
+        <input type="hidden" name="next" value="{{ next or '' }}">
+        <button class="btn-primary w-fit" type="submit">Zaloguj</button>
+      </form>
+
+      <div class="mt-6 text-xs text-slate-500 leading-relaxed">
+        Ustaw <code class="px-1 py-0.5 rounded bg-black/5">ADMIN_USER</code> i <code class="px-1 py-0.5 rounded bg-black/5">ADMIN_PASS</code> w Render → Environment.
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

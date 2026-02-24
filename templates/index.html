@@ -323,8 +323,7 @@
             <div class="mt-2">
               <div class="font-medium">{{ COMPANY_NAME }}</div>
               {% if COMPANY_NIP %}<div>NIP: {{ COMPANY_NIP }}</div>{% endif %}
-              {% if COMPANY_ADDRESS %}<div>{{ COMPANY_ADDRESS|replace("
-", "<br>")|safe }}</div>{% endif %}
+              {% if COMPANY_ADDRESS %}<div>{{ COMPANY_ADDRESS|replace("\n", "<br>")|safe }}</div>{% endif %}
             </div>
           </div>
         {% endif %}

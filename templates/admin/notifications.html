@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="paper-section">
+  <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-12">
+    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <div class="text-xs font-semibold tracking-[0.14em] uppercase text-slate-500">ADMIN</div>
+        <h1 class="text-2xl md:text-3xl font-semibold mt-2">Powiadomienia (Leady)</h1>
+        <div class="mt-2 text-sm text-slate-600">Łącznie: <span class="font-medium text-slate-900">{{ total }}</span></div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+        <form method="get" action="{{ url_for('admin_notifications') }}" class="contact-form flex gap-2">
+          <input class="input" name="q" value="{{ q }}" placeholder="Szukaj: imię / email / tel / treść" style="min-width: 320px;">
+          <button class="btn-primary" type="submit">Szukaj</button>
+        </form>
+        <a class="btn-ghost" href="{{ url_for('admin_logout') }}">Wyloguj</a>
+      </div>
+    </div>
+
+    <div class="mt-8 rounded-3xl border border-black/10 bg-white/60 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-white/70 border-b border-black/10">
+            <tr class="text-left text-slate-600">
+              <th class="px-4 py-3">Data</th>
+              <th class="px-4 py-3">Klient</th>
+              <th class="px-4 py-3">Kontakt</th>
+              <th class="px-4 py-3">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in leads %}
+              {% set subj = 'Odpowiedź — zapytanie #' ~ l.id %}
+              {% set body = 'Dzień dobry ' ~ (l.name or '') ~ ',\n\nDziękujemy za wiadomość. Wrócimy z odpowiedzią możliwie szybko.\n\n---\nTwoja wiadomość:\n' ~ (l.message or '') %}
+
+              <tr class="border-b border-black/5">
+                <td class="px-4 py-3 whitespace-nowrap text-slate-700">
+                  <div class="font-medium text-slate-900">{{ l.created_at }}</div>
+                  <div class="text-xs text-slate-500">ID: {{ l.id }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium text-slate-900">{{ l.name }}</div>
+                  {% if l.source_path %}<div class="text-xs text-slate-500">{{ l.source_path }}</div>{% endif %}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="space-y-1">
+                    <div>
+                      <a class="underline" href="mailto:{{ l.email }}">{{ l.email }}</a>
+                    </div>
+                    {% if l.phone %}
+                      <div>
+                        <a class="underline" href="tel:{{ (l.phone or '')|replace(' ', '') }}">{{ l.phone }}</a>
+                      </div>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <div class="flex flex-wrap gap-2">
+                    <a
+                      class="btn-ghost"
+                      href="{{ mailto_link(l.email, subj, body) }}"
+                      data-reply-link
+                      data-gmail="{{ gmail_compose_link(l.email, subj, body) }}"
+                      >Odpowiedz</a>
+                    <a class="btn-ghost lead-toggle" href="#" data-target="leadmsg-{{ l.id }}" aria-expanded="false">Podgląd</a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr id="leadmsg-{{ l.id }}" class="hidden bg-white/70">
+                <td colspan="4" class="px-4 py-4">
+                  <div class="text-xs font-semibold tracking-[0.14em] uppercase text-slate-500">Wiadomość</div>
+                  <div class="mt-2 whitespace-pre-wrap text-slate-900">{{ l.message }}</div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="4" class="px-4 py-8 text-slate-600">Brak wpisów.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if total_pages > 1 %}
+      <div class="mt-8 flex flex-wrap gap-2 items-center">
+        {% set prev = page - 1 %}
+        {% set nxt = page + 1 %}
+
+        <a class="btn-ghost {% if page <= 1 %}opacity-50 pointer-events-none{% endif %}" href="{{ url_for('admin_notifications', q=q, page=prev) }}">← Poprzednia</a>
+        <div class="text-sm text-slate-600">Strona <span class="font-medium text-slate-900">{{ page }}</span> / {{ total_pages }}</div>
+        <a class="btn-ghost {% if page >= total_pages %}opacity-50 pointer-events-none{% endif %}" href="{{ url_for('admin_notifications', q=q, page=nxt) }}">Następna →</a>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

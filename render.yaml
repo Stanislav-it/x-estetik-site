@@ -1,0 +1,76 @@
+services:
+  - type: web
+    name: x-estetik
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      # --- Core ---
+      - key: SECRET_KEY
+        generateValue: true
+      - key: STATIC_VERSION
+        sync: false
+      - key: SITE_NAME
+        sync: false
+      - key: BRAND
+        sync: false
+
+      # --- Contacts / socials ---
+      - key: CONTACT_EMAIL
+        sync: false
+      - key: CONTACT_PHONE
+        sync: false
+      - key: CONTACT_NOTE
+        sync: false
+      - key: INSTAGRAM_HANDLE
+        sync: false
+      - key: INSTAGRAM_URL
+        sync: false
+      - key: FACEBOOK_HANDLE
+        sync: false
+      - key: FACEBOOK_URL
+        sync: false
+
+      # --- Company data ---
+      - key: COMPANY_NAME
+        sync: false
+      - key: COMPANY_NIP
+        sync: false
+      - key: COMPANY_ADDRESS
+        sync: false
+
+      # --- Storage (optional) ---
+      # If you mount a persistent disk at /var/data, set DATA_DIR=/var/data.
+      - key: DATA_DIR
+        sync: false
+      - key: DB_PATH
+        sync: false
+      - key: LEADS_DIR
+        sync: false
+      - key: LEADS_JSONL_PATH
+        sync: false
+      - key: MAIL_ARCHIVE_DIR
+        sync: false
+
+      # --- Email notifications (optional) ---
+      - key: MAIL_TO
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_TLS
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+      # --- Admin (optional) ---
+      - key: ADMIN_USER
+        sync: false
+      - key: ADMIN_PASS
+        sync: false
