@@ -248,16 +248,17 @@ PRODUCTS: List[Product] = [
         slug="depimax",
         name="DepiMax™ (laser diodowy do epilacji)",
         category="lasers",
-        tag="Laser diodowy 4‑falowy",
-        short="Czterofalowy system diodowy do epilacji (755 / 808 / 940 / 1064 nm) przeznaczony do pracy gabinetowej. Wielofalowość ułatwia dopasowanie podejścia zabiegowego do fototypu, obszaru i rodzaju włosa — z naciskiem na komfort oraz powtarzalność procedury.",
+        tag="4‑wiązkowy laser diodowy",
+        short="4‑wiązkowy laser diodowy do epilacji zaprojektowany do intensywnej pracy w salonach kosmetycznych. Moc 1200W, wymienne końcówki zabiegowe i system pracy oparty na kilku długościach fal wspierają skuteczne zabiegi na różnych typach skóry oraz sprawną pracę na małych i dużych obszarach.",
         bullets=[
-            "4 długości fal w jednym urządzeniu — elastyczne dopasowanie do różnych typów owłosienia.",
-            "Końcówka z chłodzeniem kontaktowym wspiera komfort klienta podczas zabiegu.",
-            "Tryby pracy: punktowy oraz In‑Motion — wygodna praca na małych i dużych obszarach.",
-            "Proces gabinetowy: kwalifikacja, próba, zabieg właściwy, zalecenia pozabiegowe i plan wizyt.",
+            "Moc wyjściowa 1200W oraz plamka 12 × 24 mm wspierają szybką pracę na większych obszarach zabiegowych.",
+            "3 wymienne końcówki: Ø 5 mm, 12 × 12 mm oraz 12 × 24 mm — dopasowanie do różnych partii ciała.",
+            "System pracy: 808 nm lub opcjonalnie 755 + 808 + 940 + 1064 nm do pracy na różnych fototypach i głębokościach włosa.",
+            "Zaawansowane chłodzenie: woda + powietrze + szafir + TEC/półprzewodnikowe dla większego komfortu zabiegu.",
+            "Intuicyjny ekran dotykowy i głowica FOCUSLIGHT do intensywnej pracy gabinetowej.",
         ],
         price="55 000 zł",
-        pages=list(range(21, 28)),
+        pages=list(range(21, 26)),
     ),
     Product(
         slug="x-hair",
@@ -286,7 +287,7 @@ PRODUCTS: List[Product] = [
         ],
         price="35 000 zł",
         rental="2 200 zł",
-        pages=list(range(34, 37)),
+        pages=list(range(32, 35)),
     ),
     Product(
         slug="x-fraxel-premium",
@@ -300,7 +301,7 @@ PRODUCTS: List[Product] = [
             "Zestaw głowic dopasowanych do różnych wskazań.",
         ],
         price="70 000 zł",
-        pages=list(range(28, 34)),
+        pages=list(range(26, 32)),
         badge="Premium",
     ),
 
@@ -318,7 +319,7 @@ PRODUCTS: List[Product] = [
         ],
         price="22 500 zł",
         rental="1 500 zł",
-        pages=list(range(37, 40)),
+        pages=list(range(35, 38)),
     ),
     Product(
         slug="x-boss",
@@ -333,7 +334,7 @@ PRODUCTS: List[Product] = [
         ],
         price="27 000 zł",
         rental="2 000 zł",
-        pages=[40, 41, 42],
+        pages=[38, 39, 40],
     ),
     Product(
         slug="lumera-estetik",
@@ -347,7 +348,7 @@ PRODUCTS: List[Product] = [
             "Nowoczesny interfejs i szybka praca.",
         ],
         price="39 000 zł",
-        pages=list(range(43, 49)),
+        pages=list(range(41, 47)),
     ),
     Product(
         slug="estetik-frax",
@@ -362,7 +363,7 @@ PRODUCTS: List[Product] = [
         ],
         price="25 000 zł",
         rental="1 500 zł",
-        pages=list(range(49, 55)),
+        pages=list(range(47, 53)),
     ),
     Product(
         slug="regen-lift",
@@ -377,7 +378,7 @@ PRODUCTS: List[Product] = [
         ],
         price="49 000 zł",
         rental="3 000 zł",
-        pages=list(range(55, 64)),
+        pages=list(range(53, 62)),
     ),
     Product(
         slug="x-contour-krio",
@@ -394,7 +395,7 @@ PRODUCTS: List[Product] = [
         ],
         price="55 000 zł",
         rental="2600 zł",
-        pages=list(range(64, 69)),
+        pages=list(range(62, 67)),
         badge="Body shaping",
     ),
     Product(
@@ -409,7 +410,7 @@ PRODUCTS: List[Product] = [
             "Nowoczesny panel i ergonomia.",
         ],
         price="50 000 zł",
-        pages=list(range(69, 73)),
+        pages=list(range(67, 71)),
     ),
     Product(
         slug="ems-formax",
@@ -423,7 +424,7 @@ PRODUCTS: List[Product] = [
             "Wysoka moc i duży ekran sterowania.",
         ],
         price="55 000 zł",
-        pages=list(range(73, 82)),
+        pages=list(range(71, 80)),
     ),
     Product(
         slug="x-derma",
@@ -437,7 +438,7 @@ PRODUCTS: List[Product] = [
             "Minimalny dyskomfort i szybki efekt zabiegowy.",
         ],
         price="15 000 zł",
-        pages=[91, 92, 93, 94, 97, 98, 99],
+        pages=[89, 90, 91, 92, 95, 96, 97],
     ),
 
     Product(
@@ -470,7 +471,7 @@ PRODUCTS: List[Product] = [
         ],
         price="5 500 zł",
         rental="500 zł",
-        pages=list(range(82, 86)),
+        pages=list(range(80, 84)),
     ),
     Product(
         slug="biopen-q2",
@@ -485,7 +486,7 @@ PRODUCTS: List[Product] = [
         ],
         price="800 zł",
         rental="150 zł",
-        pages=list(range(86, 91)),
+        pages=list(range(84, 89)),
         badge="Top value",
     ),
 
