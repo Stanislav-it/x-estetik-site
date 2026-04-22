@@ -68,6 +68,10 @@
       </div>
     </div>
 
+    {% if product.slug == 'q-switch-nanox' %}
+      {% include 'partials/products/q_switch_nanox.html' %}
+    {% endif %}
+
     {% if product.gallery %}
       <div class="mt-16">
         <div class="flex items-end justify-between gap-6">
