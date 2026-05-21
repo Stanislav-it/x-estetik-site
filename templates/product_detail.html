@@ -1,6 +1,22 @@
 {% extends "base.html" %}
 {% set title = product.name ~ " — X‑Estetik" %}
 
+{% block head %}
+  {% if product.canonical_url %}<link rel="canonical" href="{{ product.canonical_url }}">{% endif %}
+  <meta property="og:type" content="product">
+  <meta property="og:title" content="{{ product.name }}">
+  {% if product.short %}<meta property="og:description" content="{{ product.short }}">{% endif %}
+  {% if product.image_url %}<meta property="og:image" content="{{ product.image_url }}">{% endif %}
+  {% if product.canonical_url %}<meta property="og:url" content="{{ product.canonical_url }}">{% endif %}
+  {% if product.price_amount %}
+  <meta property="product:price:amount" content="{{ product.price_amount }}">
+  <meta property="product:price:currency" content="{{ product.price_currency or 'PLN' }}">
+  {% endif %}
+  {% if product.structured_data %}
+  <script type="application/ld+json">{{ product.structured_data|safe }}</script>
+  {% endif %}
+{% endblock %}
+
 {% block content %}
 <section class="paper-section">
   <div class="mx-auto max-w-[1180px] px-5 md:px-8 py-16 md:py-20">
@@ -35,6 +51,11 @@
           <div class="info-card">
             <div class="info-kicker">Cena</div>
             <div class="mt-2 text-lg font-semibold">{{ product.price or "—" }}</div>
+            {% if product.price_amount %}
+              <meta itemprop="price" content="{{ product.price_amount }}">
+              <meta itemprop="priceCurrency" content="{{ product.price_currency or 'PLN' }}">
+              <meta itemprop="availability" content="{{ product.merchant_availability or 'in_stock' }}">
+            {% endif %}
             {% if product.rental %}<div class="mt-1 text-sm text-slate-600">Wynajem: od {{ product.rental }}/mies.</div>{% endif %}
           </div>
 

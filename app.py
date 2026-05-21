@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from flask import Flask, abort, flash, redirect, render_template, request, send_from_directory, session, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, send_from_directory, session, url_for, current_app
 
 APP_DIR = Path(__file__).resolve().parent
 
@@ -672,6 +672,19 @@ def create_app() -> Flask:
         STATIC_VERSION=get_env("STATIC_VERSION", str(int(datetime.utcnow().timestamp()))),
         SITE_NAME=get_env("SITE_NAME", "X‑Estetik"),
         BRAND=get_env("BRAND", "X‑Estetik"),
+        SITE_URL=get_env("SITE_URL", "https://x-estetik.pl").rstrip("/"),
+
+        # Google Merchant Center / product feed
+        MERCHANT_BRAND=get_env("MERCHANT_BRAND", "X‑Estetik"),
+        MERCHANT_COUNTRY=get_env("MERCHANT_COUNTRY", "PL"),
+        MERCHANT_CURRENCY=get_env("MERCHANT_CURRENCY", "PLN"),
+        MERCHANT_LANGUAGE=get_env("MERCHANT_LANGUAGE", "pl"),
+        MERCHANT_AVAILABILITY=get_env("MERCHANT_AVAILABILITY", "in_stock"),
+        MERCHANT_CONDITION=get_env("MERCHANT_CONDITION", "new"),
+        MERCHANT_IDENTIFIER_EXISTS=get_env("MERCHANT_IDENTIFIER_EXISTS", "no"),
+        MERCHANT_GOOGLE_PRODUCT_CATEGORY=get_env("MERCHANT_GOOGLE_PRODUCT_CATEGORY", "Business & Industrial > Medical > Medical Equipment"),
+        # Optional. Leave empty if shipping is configured directly in Merchant Center.
+        MERCHANT_SHIPPING_PRICE=get_env("MERCHANT_SHIPPING_PRICE", ""),
 
         # Dane firmy (stopka / polityki / kontakt)
         COMPANY_NAME=get_env("COMPANY_NAME", "Mazur Estetik Dariusz Oboleński"),
@@ -889,6 +902,7 @@ def create_app() -> Flask:
         return {
             "SITE_NAME": app.config["SITE_NAME"],
             "BRAND": app.config["BRAND"],
+            "SITE_URL": app.config.get("SITE_URL", ""),
             "CONTACT_EMAIL": app.config["CONTACT_EMAIL"],
             "CONTACT_PHONE": app.config["CONTACT_PHONE"],
             "CONTACT_NOTE": app.config.get("CONTACT_NOTE", ""),
@@ -1085,6 +1099,12 @@ def create_app() -> Flask:
         view["back_url"] = back_url
         view["hero"] = view["thumb"] if view.get("photo_base") else (first_gallery_image(slug) or view["thumb"])
         view["gallery"] = list_gallery_images(slug)
+        view["canonical_url"] = absolute_url(url_for("product_detail", slug=p.slug))
+        view["image_url"] = absolute_url(view["hero"])
+        view["price_amount"] = product_price_amount(p)
+        view["price_currency"] = current_app.config.get("MERCHANT_CURRENCY", "PLN")
+        view["merchant_availability"] = current_app.config.get("MERCHANT_AVAILABILITY", "in_stock")
+        view["structured_data"] = json.dumps(product_structured_data(p, view), ensure_ascii=False, separators=(",", ":"))
 
         # Effects (before/after) — visible for selected devices
         effects_folder = (p.effects_folder or "").strip()
@@ -1103,7 +1123,34 @@ def create_app() -> Flask:
             effects_images=effects_images,
             effects_folder=folder,
             effects_tech_url=effects_url,
+            meta_description=meta_description_for_product(p),
+            canonical_url=view["canonical_url"],
         )
+
+    @app.get("/merchant-center-feed.xml")
+    @app.get("/google-merchant-feed.xml")
+    @app.get("/merchant-feed.xml")
+    def merchant_center_feed():
+        """Google Merchant Center RSS 2.0 product feed."""
+        xml = build_google_merchant_feed(PRODUCTS)
+        return app.response_class(xml, mimetype="application/xml; charset=utf-8")
+
+    @app.get("/sitemap.xml")
+    def sitemap_xml():
+        xml = build_sitemap_xml()
+        return app.response_class(xml, mimetype="application/xml; charset=utf-8")
+
+    @app.get("/robots.txt")
+    def robots_txt():
+        base = site_base_url()
+        body = "\n".join([
+            "User-agent: *",
+            "Allow: /",
+            f"Sitemap: {base}/sitemap.xml",
+            f"# Google Merchant Center feed: {base}/merchant-center-feed.xml",
+            "",
+        ])
+        return app.response_class(body, mimetype="text/plain; charset=utf-8")
 
     @app.get("/katalog")
     def catalog_download():
@@ -1369,6 +1416,225 @@ def to_view(p: Product) -> Dict:
         "effects_folder": p.effects_folder,
         "effects_url": p.effects_url,
     }
+
+
+def strip_text(value: str) -> str:
+    """Return plain text suitable for feeds/meta descriptions."""
+    text = re.sub(r"<[^>]+>", " ", value or "")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def site_base_url() -> str:
+    """Canonical production base URL used for feeds and structured data."""
+    try:
+        base = (current_app.config.get("SITE_URL") or "").strip().rstrip("/")
+    except Exception:
+        base = ""
+    if not base:
+        try:
+            base = request.url_root.rstrip("/")
+        except Exception:
+            base = "https://x-estetik.pl"
+    return base
+
+
+def absolute_url(url: str) -> str:
+    """Convert a relative URL from url_for/static into an absolute production URL."""
+    value = (url or "").strip()
+    if not value:
+        return ""
+    if re.match(r"^https?://", value, flags=re.IGNORECASE):
+        return value
+    if value.startswith("//"):
+        return "https:" + value
+    if not value.startswith("/"):
+        value = "/" + value
+    return site_base_url() + value
+
+
+def product_price_amount(p: Product) -> str:
+    """Extract the first numeric price and format it for Google feeds / schema."""
+    raw = (p.price or "").replace("\xa0", " ").strip()
+    if not raw:
+        return ""
+    match = re.search(r"(\d[\d\s]*)(?:[,.](\d{1,2}))?", raw)
+    if not match:
+        return ""
+    whole = re.sub(r"\s+", "", match.group(1))
+    cents = (match.group(2) or "00")[:2].ljust(2, "0")
+    try:
+        return f"{int(whole)}.{cents}"
+    except Exception:
+        return ""
+
+
+def meta_description_for_product(p: Product) -> str:
+    parts = [p.name, p.short] + list(p.bullets[:2])
+    text = strip_text(". ".join([x for x in parts if x]))
+    if len(text) > 156:
+        return text[:153].rstrip() + "..."
+    return text
+
+
+def merchant_description_for_product(p: Product) -> str:
+    parts = [p.short] + list(p.bullets)
+    text = strip_text(" ".join([x for x in parts if x]))
+    # Merchant Center accepts long descriptions, but keep generated feed tidy.
+    return text[:4900].rstrip()
+
+
+def merchant_product_record(p: Product) -> Dict[str, str]:
+    view = to_view(p)
+    currency = current_app.config.get("MERCHANT_CURRENCY", "PLN")
+    category_meta = CATEGORY_META.get(p.category, {})
+    amount = product_price_amount(p)
+    price = f"{amount} {currency}" if amount else ""
+
+    return {
+        "id": p.slug,
+        "title": p.name,
+        "description": merchant_description_for_product(p),
+        "link": absolute_url(url_for("product_detail", slug=p.slug)),
+        "image_link": absolute_url(view.get("thumb", "")),
+        "availability": current_app.config.get("MERCHANT_AVAILABILITY", "in_stock"),
+        "price": price,
+        "condition": current_app.config.get("MERCHANT_CONDITION", "new"),
+        "brand": current_app.config.get("MERCHANT_BRAND", "X‑Estetik"),
+        "identifier_exists": current_app.config.get("MERCHANT_IDENTIFIER_EXISTS", "no"),
+        "google_product_category": current_app.config.get("MERCHANT_GOOGLE_PRODUCT_CATEGORY", ""),
+        "product_type": category_meta.get("label", p.category),
+        "adult": "no",
+    }
+
+
+def product_structured_data(p: Product, view: Dict) -> Dict:
+    currency = current_app.config.get("MERCHANT_CURRENCY", "PLN")
+    amount = view.get("price_amount") or product_price_amount(p)
+    availability_map = {
+        "in_stock": "https://schema.org/InStock",
+        "out_of_stock": "https://schema.org/OutOfStock",
+        "preorder": "https://schema.org/PreOrder",
+        "backorder": "https://schema.org/BackOrder",
+    }
+    availability = availability_map.get((current_app.config.get("MERCHANT_AVAILABILITY") or "in_stock").strip(), "https://schema.org/InStock")
+
+    data = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": p.name,
+        "description": merchant_description_for_product(p),
+        "sku": p.slug,
+        "brand": {
+            "@type": "Brand",
+            "name": current_app.config.get("MERCHANT_BRAND", "X‑Estetik"),
+        },
+        "category": CATEGORY_META.get(p.category, {}).get("label", p.category),
+        "image": [view.get("image_url") or absolute_url(view.get("hero", ""))],
+        "url": view.get("canonical_url") or absolute_url(url_for("product_detail", slug=p.slug)),
+        "offers": {
+            "@type": "Offer",
+            "url": view.get("canonical_url") or absolute_url(url_for("product_detail", slug=p.slug)),
+            "priceCurrency": currency,
+            "availability": availability,
+            "itemCondition": "https://schema.org/NewCondition",
+        },
+    }
+    if amount:
+        data["offers"]["price"] = amount
+    return data
+
+
+def xml_text(value: str) -> str:
+    return html_escape(value or "", quote=True)
+
+
+def build_google_merchant_feed(products: List[Product]) -> str:
+    base = site_base_url()
+    items = []
+    for p in products:
+        rec = merchant_product_record(p)
+        # Skip products that cannot be submitted safely to Merchant Center.
+        if not rec.get("price") or not rec.get("image_link") or not rec.get("link"):
+            continue
+
+        fields = [
+            ("g:id", rec["id"]),
+            ("g:title", rec["title"]),
+            ("g:description", rec["description"]),
+            ("g:link", rec["link"]),
+            ("g:image_link", rec["image_link"]),
+            ("g:availability", rec["availability"]),
+            ("g:price", rec["price"]),
+            ("g:condition", rec["condition"]),
+            ("g:brand", rec["brand"]),
+            ("g:identifier_exists", rec["identifier_exists"]),
+            ("g:adult", rec["adult"]),
+        ]
+        if rec.get("google_product_category"):
+            fields.append(("g:google_product_category", rec["google_product_category"]))
+        if rec.get("product_type"):
+            fields.append(("g:product_type", rec["product_type"]))
+
+        shipping_price = (current_app.config.get("MERCHANT_SHIPPING_PRICE") or "").strip()
+        if shipping_price:
+            fields.append(("g:shipping", "__SHIPPING_BLOCK__"))
+
+        lines = ["    <item>"]
+        for tag, value in fields:
+            if value == "__SHIPPING_BLOCK__":
+                lines.extend([
+                    "      <g:shipping>",
+                    f"        <g:country>{xml_text(current_app.config.get('MERCHANT_COUNTRY', 'PL'))}</g:country>",
+                    f"        <g:price>{xml_text(shipping_price)}</g:price>",
+                    "      </g:shipping>",
+                ])
+            else:
+                lines.append(f"      <{tag}>{xml_text(value)}</{tag}>")
+        lines.append("    </item>")
+        items.append("\n".join(lines))
+
+    return "\n".join([
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">',
+        '  <channel>',
+        f"    <title>{xml_text(current_app.config.get('SITE_NAME', 'X‑Estetik'))} — Google Merchant Center feed</title>",
+        f"    <link>{xml_text(base)}</link>",
+        f"    <description>{xml_text('Produkty X‑Estetik dla Google Merchant Center')}</description>",
+        *items,
+        '  </channel>',
+        '</rss>',
+        '',
+    ])
+
+
+def build_sitemap_xml() -> str:
+    static_routes = [
+        url_for("index"),
+        url_for("about"),
+        url_for("lasers"),
+        url_for("hi_tech"),
+        url_for("accessories"),
+        url_for("gielda"),
+        url_for("finansowanie"),
+        url_for("reviews"),
+        url_for("filmy"),
+        url_for("social"),
+        url_for("strony_www_dla_gabinetow"),
+        url_for("merchant_center_feed"),
+    ]
+    product_urls = [url_for("product_detail", slug=p.slug) for p in PRODUCTS]
+    urls = [absolute_url(u) for u in static_routes + product_urls]
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    today = datetime.utcnow().date().isoformat()
+    for u in urls:
+        lines.append("  <url>")
+        lines.append(f"    <loc>{xml_text(u)}</loc>")
+        lines.append(f"    <lastmod>{today}</lastmod>")
+        lines.append("  </url>")
+    lines.append("</urlset>")
+    lines.append("")
+    return "\n".join(lines)
 
 
 def list_gallery_images(slug: str) -> List[str]:

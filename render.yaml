@@ -15,6 +15,28 @@ services:
         sync: false
       - key: BRAND
         sync: false
+      - key: SITE_URL
+        sync: false
+
+      # --- Google Merchant Center feed / Product schema ---
+      - key: MERCHANT_BRAND
+        sync: false
+      - key: MERCHANT_COUNTRY
+        sync: false
+      - key: MERCHANT_CURRENCY
+        sync: false
+      - key: MERCHANT_LANGUAGE
+        sync: false
+      - key: MERCHANT_AVAILABILITY
+        sync: false
+      - key: MERCHANT_CONDITION
+        sync: false
+      - key: MERCHANT_IDENTIFIER_EXISTS
+        sync: false
+      - key: MERCHANT_GOOGLE_PRODUCT_CATEGORY
+        sync: false
+      - key: MERCHANT_SHIPPING_PRICE
+        sync: false
 
       # --- Contacts / socials ---
       - key: CONTACT_EMAIL
