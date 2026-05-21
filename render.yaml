@@ -37,6 +37,18 @@ services:
         sync: false
       - key: MERCHANT_SHIPPING_PRICE
         sync: false
+      - key: MERCHANT_SHIPPING_SERVICE
+        sync: false
+      - key: MERCHANT_MIN_HANDLING_TIME
+        sync: false
+      - key: MERCHANT_MAX_HANDLING_TIME
+        sync: false
+      - key: MERCHANT_MIN_TRANSIT_TIME
+        sync: false
+      - key: MERCHANT_MAX_TRANSIT_TIME
+        sync: false
+      - key: MERCHANT_EXCLUDED_SLUGS
+        sync: false
 
       # --- Contacts / socials ---
       - key: CONTACT_EMAIL

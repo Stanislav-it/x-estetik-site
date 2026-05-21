@@ -683,8 +683,15 @@ def create_app() -> Flask:
         MERCHANT_CONDITION=get_env("MERCHANT_CONDITION", "new"),
         MERCHANT_IDENTIFIER_EXISTS=get_env("MERCHANT_IDENTIFIER_EXISTS", "no"),
         MERCHANT_GOOGLE_PRODUCT_CATEGORY=get_env("MERCHANT_GOOGLE_PRODUCT_CATEGORY", "Business & Industrial > Medical > Medical Equipment"),
-        # Optional. Leave empty if shipping is configured directly in Merchant Center.
-        MERCHANT_SHIPPING_PRICE=get_env("MERCHANT_SHIPPING_PRICE", ""),
+        # Google Merchant Center shipping defaults: free delivery in Poland.
+        MERCHANT_SHIPPING_PRICE=get_env("MERCHANT_SHIPPING_PRICE", "0.00 PLN"),
+        MERCHANT_SHIPPING_SERVICE=get_env("MERCHANT_SHIPPING_SERVICE", "Dostawa kurierska"),
+        MERCHANT_MIN_HANDLING_TIME=get_env("MERCHANT_MIN_HANDLING_TIME", "0"),
+        MERCHANT_MAX_HANDLING_TIME=get_env("MERCHANT_MAX_HANDLING_TIME", "1"),
+        MERCHANT_MIN_TRANSIT_TIME=get_env("MERCHANT_MIN_TRANSIT_TIME", "1"),
+        MERCHANT_MAX_TRANSIT_TIME=get_env("MERCHANT_MAX_TRANSIT_TIME", "5"),
+        # All products stay in the Merchant Center feed.
+        MERCHANT_EXCLUDED_SLUGS=get_env("MERCHANT_EXCLUDED_SLUGS", ""),
 
         # Dane firmy (stopka / polityki / kontakt)
         COMPANY_NAME=get_env("COMPANY_NAME", "Mazur Estetik Dariusz Oboleński"),
@@ -1490,11 +1497,49 @@ def meta_description_for_product(p: Product) -> str:
     return text
 
 
+def merchant_title_for_product(p: Product) -> str:
+    """Feed-only title cleanup for Google Merchant Center.
+
+    The public product pages keep their original names. In the XML feed we avoid
+    ambiguous terms that automated policy systems can misread, while keeping all
+    products submitted.
+    """
+    replacements = {
+        "kartridze-pen-16-igl": "Końcówki do pena mikroigłowego 16-igłowe",
+        "kartridze-rf-vacuum": "Końcówki do RF mikroigłowego z vacuum",
+        "kartridze-frax": "Końcówki do RF mikroigłowego ESTETIK FRAX",
+    }
+    return replacements.get(p.slug, p.name)
+
+
 def merchant_description_for_product(p: Product) -> str:
     parts = [p.short] + list(p.bullets)
     text = strip_text(" ".join([x for x in parts if x]))
+    # Avoid the ambiguous Polish word "kartridż" in the Merchant feed; Google
+    # can incorrectly associate cartridge-like wording with prohibited goods.
+    text = re.sub(r"(?i)kartridże", "wymienne końcówki", text)
+    text = re.sub(r"(?i)kartridż", "wymienna końcówka", text)
     # Merchant Center accepts long descriptions, but keep generated feed tidy.
     return text[:4900].rstrip()
+
+
+def merchant_image_for_product(slug: str, fallback_url: str = "") -> str:
+    """Use Google-friendly sanitized image filenames for Merchant Center.
+
+    Merchant Center can be strict about fetching image URLs. The public site can
+    still use original media names, while the feed uses ASCII-safe URLs such as
+    /static/merchant/x-levage.jpg.
+    """
+    folder = APP_DIR / "static" / "merchant"
+    allowed = [".jpg", ".jpeg", ".png", ".webp"]
+    try:
+        for ext in allowed:
+            fp = folder / f"{slug}{ext}"
+            if fp.exists():
+                return url_for("static", filename=f"merchant/{fp.name}")
+    except Exception:
+        pass
+    return fallback_url
 
 
 def merchant_product_record(p: Product) -> Dict[str, str]:
@@ -1506,10 +1551,10 @@ def merchant_product_record(p: Product) -> Dict[str, str]:
 
     return {
         "id": p.slug,
-        "title": p.name,
+        "title": merchant_title_for_product(p),
         "description": merchant_description_for_product(p),
         "link": absolute_url(url_for("product_detail", slug=p.slug)),
-        "image_link": absolute_url(view.get("thumb", "")),
+        "image_link": absolute_url(merchant_image_for_product(p.slug, view.get("thumb", ""))),
         "availability": current_app.config.get("MERCHANT_AVAILABILITY", "in_stock"),
         "price": price,
         "condition": current_app.config.get("MERCHANT_CONDITION", "new"),
@@ -1593,12 +1638,26 @@ def build_google_merchant_feed(products: List[Product]) -> str:
         if shipping_price:
             fields.append(("g:shipping", "__SHIPPING_BLOCK__"))
 
+        min_handling = (current_app.config.get("MERCHANT_MIN_HANDLING_TIME") or "").strip()
+        max_handling = (current_app.config.get("MERCHANT_MAX_HANDLING_TIME") or "").strip()
+        min_transit = (current_app.config.get("MERCHANT_MIN_TRANSIT_TIME") or "").strip()
+        max_transit = (current_app.config.get("MERCHANT_MAX_TRANSIT_TIME") or "").strip()
+        if min_handling:
+            fields.append(("g:min_handling_time", min_handling))
+        if max_handling:
+            fields.append(("g:max_handling_time", max_handling))
+        if min_transit:
+            fields.append(("g:min_transit_time", min_transit))
+        if max_transit:
+            fields.append(("g:max_transit_time", max_transit))
+
         lines = ["    <item>"]
         for tag, value in fields:
             if value == "__SHIPPING_BLOCK__":
                 lines.extend([
                     "      <g:shipping>",
                     f"        <g:country>{xml_text(current_app.config.get('MERCHANT_COUNTRY', 'PL'))}</g:country>",
+                    f"        <g:service>{xml_text(current_app.config.get('MERCHANT_SHIPPING_SERVICE', 'Dostawa kurierska'))}</g:service>",
                     f"        <g:price>{xml_text(shipping_price)}</g:price>",
                     "      </g:shipping>",
                 ])
