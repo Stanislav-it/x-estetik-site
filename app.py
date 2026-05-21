@@ -1257,9 +1257,22 @@ def create_app() -> Flask:
             total=total,
         )
 
+    @app.get("/zwroty-i-reklamacje")
+    def returns_policy():
+        policies = policy_content(app)
+        title, body = policies["returns"]
+        return render_template("policy.html", page_title=title, page_body=body)
+
     @app.get("/polityki/<slug>")
     def policy(slug: str):
         policies = policy_content(app)
+        aliases = {
+            "zwroty": "returns",
+            "zwroty-reklamacje": "returns",
+            "zwroty-i-reklamacje": "returns",
+            "returns": "returns",
+        }
+        slug = aliases.get(slug, slug)
         if slug not in policies:
             abort(404)
         title, body = policies[slug]
@@ -1621,6 +1634,7 @@ def build_sitemap_xml() -> str:
         url_for("filmy"),
         url_for("social"),
         url_for("strony_www_dla_gabinetow"),
+        url_for("returns_policy"),
         url_for("merchant_center_feed"),
     ]
     product_urls = [url_for("product_detail", slug=p.slug) for p in PRODUCTS]
@@ -1838,6 +1852,23 @@ def policy_content(app: Flask) -> Dict[str, tuple]:
     <p>Możesz zmienić ustawienia cookies w swojej przeglądarce (blokowanie, usuwanie). Ograniczenie cookies niezbędnych może wpłynąć na działanie Serwisu.</p>
     """
 
+    returns = f"""
+    <p>Poniższe zasady dotyczą sprzedaży urządzeń i technologii prezentowanych w serwisie <strong>{site}</strong> na rzecz firm oraz podmiotów wykorzystujących sprzęt w ramach prowadzonej działalności gospodarczej.</p>
+
+    <h2>Zwroty pełnowartościowego sprzętu</h2>
+    <p>Nie przyjmujemy zwrotów pełnowartościowego sprzętu zakupionego do działalności gospodarczej, jeżeli urządzenie jest zgodne z zamówieniem i nie posiada wad.</p>
+
+    <h2>Reklamacje</h2>
+    <p>Klient może złożyć reklamację w ramach rękojmi zgodnie z obowiązującymi przepisami prawa. Reklamacja powinna zawierać dane kupującego, opis problemu, dokument zakupu oraz dane identyfikujące urządzenie.</p>
+
+    <h2>Gwarancja</h2>
+    <p>Urządzenia są objęte 24‑miesięczną gwarancją, o ile indywidualne ustalenia z klientem lub dokument gwarancyjny nie stanowią inaczej. Szczegóły obsługi gwarancyjnej są ustalane po zgłoszeniu sprawy i weryfikacji urządzenia.</p>
+
+    <h2>Kontakt w sprawie reklamacji</h2>
+    <p>Przed odesłaniem urządzenia prosimy o wcześniejszy kontakt w celu ustalenia dalszych kroków.</p>
+    <p>{contact_html if contact_html else admin_block}</p>
+    """
+
     terms = f"""
     <p>Niniejszy regulamin określa zasady korzystania z Serwisu <strong>{site}</strong>.</p>
 
@@ -1869,6 +1900,7 @@ def policy_content(app: Flask) -> Dict[str, tuple]:
         "privacy": ("Polityka prywatności", privacy),
         "cookies": ("Polityka cookies", cookies),
         "terms": ("Regulamin serwisu", terms),
+        "returns": ("Zwroty i reklamacje", returns),
         "disclaimer": ("Zastrzeżenia", disclaimer),
     }
 
