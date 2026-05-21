@@ -717,6 +717,13 @@ def create_app() -> Flask:
         SMTP_PASS=get_env("SMTP_PASS", ""),
         SMTP_FROM=get_env("SMTP_FROM", ""),
 
+        # Google Tag Manager / Google Analytics 4 (optional)
+        # Render env vars:
+        #   GTM_ID=GTM-XXXXXXX
+        #   GA4_MEASUREMENT_ID=G-XXXXXXXXXX
+        GTM_ID=get_env("GTM_ID", ""),
+        GA4_MEASUREMENT_ID=get_env("GA4_MEASUREMENT_ID", get_env("GA4_ID", "")),
+
         # R2 public bucket base URL for /filmy showcase clips.
         # Example: https://<pub-...>.r2.dev
         FILMY_BASE_URL=get_env("FILMY_BASE_URL", "https://pub-6b9f87ec02e04dc88c5b18144e88754a.r2.dev"),
@@ -896,6 +903,8 @@ def create_app() -> Flask:
             "INSTAGRAM_HANDLE": app.config.get("INSTAGRAM_HANDLE", ""),
             "FACEBOOK_URL": app.config.get("FACEBOOK_URL", ""),
             "FACEBOOK_HANDLE": app.config.get("FACEBOOK_HANDLE", ""),
+            "GTM_ID": app.config.get("GTM_ID", ""),
+            "GA4_MEASUREMENT_ID": app.config.get("GA4_MEASUREMENT_ID", ""),
             "HAS_ACCESSORIES": any(p.category == "accessories" for p in PRODUCTS),
             "STATIC_VERSION": app.config["STATIC_VERSION"],
             "CURRENT_YEAR": datetime.utcnow().year,
@@ -1520,11 +1529,12 @@ def policy_content(app: Flask) -> Dict[str, tuple]:
     <ul>
       <li><strong>Kontakt i obsługa zapytań</strong> — udzielenie odpowiedzi, przygotowanie oferty, umówienie prezentacji (art. 6 ust. 1 lit. b RODO — działania przed zawarciem umowy / art. 6 ust. 1 lit. f RODO — uzasadniony interes Administratora).</li>
       <li><strong>Zapewnienie bezpieczeństwa Serwisu</strong> — wykrywanie nadużyć, utrzymanie i diagnostyka (art. 6 ust. 1 lit. f RODO).</li>
+      <li><strong>Analityka</strong> — po akceptacji cookies pomiar statystyk odwiedzin oraz zdarzeń w Serwisie, np. przez Google Analytics 4 / Google Tag Manager (art. 6 ust. 1 lit. a RODO — zgoda).</li>
       <li><strong>Obrona lub dochodzenie roszczeń</strong> (art. 6 ust. 1 lit. f RODO).</li>
     </ul>
 
     <h2>4. Odbiorcy danych</h2>
-    <p>Dane mogą być udostępniane podmiotom wspierającym Administratora w utrzymaniu Serwisu (np. hosting/IT) wyłącznie na podstawie umów powierzenia i w zakresie niezbędnym do realizacji usług.</p>
+    <p>Dane mogą być udostępniane podmiotom wspierającym Administratora w utrzymaniu Serwisu (np. hosting/IT) oraz — po akceptacji cookies analitycznych — dostawcom narzędzi analitycznych, takim jak Google, wyłącznie w zakresie niezbędnym do realizacji usług.</p>
 
     <h2>5. Okres przechowywania</h2>
     <ul>
@@ -1553,9 +1563,10 @@ def policy_content(app: Flask) -> Dict[str, tuple]:
     <ul>
       <li><strong>Niezbędne</strong> — wymagane do działania Serwisu i jego funkcji (np. mechanizmy bezpieczeństwa, pamięć ustawień).</li>
       <li><strong>Funkcjonalne</strong> — poprawiają wygodę korzystania (np. zapamiętanie akceptacji komunikatu cookies w przeglądarce).</li>
+      <li><strong>Analityczne</strong> — po akceptacji cookies mogą być wykorzystywane do pomiaru statystyk odwiedzin i skuteczności formularzy kontaktowych, np. przez Google Analytics 4 / Google Tag Manager.</li>
     </ul>
 
-    <p>Serwis nie wykorzystuje cookies marketingowych. Jeśli w przyszłości zostaną dodane narzędzia analityczne lub reklamowe, polityka zostanie zaktualizowana.</p>
+    <p>Cookies analityczne są uruchamiane dopiero po akceptacji komunikatu cookies. Serwis nie wykorzystuje cookies marketingowych, chyba że właściciel serwisu skonfiguruje takie tagi w Google Tag Managerze i odpowiednio zaktualizuje politykę.</p>
 
     <h2>3. Zarządzanie cookies</h2>
     <p>Możesz zmienić ustawienia cookies w swojej przeglądarce (blokowanie, usuwanie). Ograniczenie cookies niezbędnych może wpłynąć na działanie Serwisu.</p>

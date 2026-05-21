@@ -343,6 +343,21 @@
 })();
 
 (function () {
+  // ---------------- GTM / GA4 dataLayer events ----------------
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form || !form.matches || !form.matches('form.contact-form')) return;
+    if (window.dataLayer && Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({
+        event: 'lead_form_submit',
+        form_name: 'contact',
+        form_action: form.getAttribute('action') || window.location.pathname
+      });
+    }
+  }, true);
+})();
+
+(function () {
   // ---------------- Cookie notice (localStorage) ----------------
   const banner = document.getElementById('cookieBanner');
   const btn = document.getElementById('cookieAccept');
@@ -363,6 +378,17 @@
     } catch (e) {
       // ignore
     }
+
+    // Grant analytics consent for GTM / GA4 after the visitor accepts cookies.
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        analytics_storage: 'granted'
+      });
+    }
+    if (window.dataLayer && Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({ event: 'cookie_consent_granted' });
+    }
+
     banner.classList.add('hidden');
   });
 })();

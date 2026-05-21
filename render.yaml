@@ -69,6 +69,12 @@ services:
       - key: SMTP_FROM
         sync: false
 
+      # --- Google Tag Manager / Google Analytics 4 (optional) ---
+      - key: GTM_ID
+        sync: false
+      - key: GA4_MEASUREMENT_ID
+        sync: false
+
       # --- Admin (optional) ---
       - key: ADMIN_USER
         sync: false

@@ -7,12 +7,68 @@
   <meta name="description" content="{{ meta_description or 'X‑Estetik — katalog urządzeń i technologii dla gabinetów oraz klinik.' }}">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}">
 
+  {% if GTM_ID or GA4_MEASUREMENT_ID %}
+  <!-- Google Consent Mode defaults + shared dataLayer -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+    (function () {
+      var analyticsGranted = false;
+      try {
+        analyticsGranted = window.localStorage && localStorage.getItem('xestetik_cookie_consent_v1') === '1';
+      } catch (e) {}
+
+      window.gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: analyticsGranted ? 'granted' : 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted'
+      });
+    })();
+  </script>
+  {% endif %}
+
+  {% if GTM_ID %}
+  <!-- Google Tag Manager -->
+  <script>
+    (function(w,d,s,l,i){
+      w[l]=w[l]||[];
+      w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+      var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),
+          dl=l!='dataLayer'?'&l='+l:'';
+      j.async=true;
+      j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+      f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer',{{ GTM_ID|tojson }});
+  </script>
+  <!-- End Google Tag Manager -->
+  {% endif %}
+
+  {% if GA4_MEASUREMENT_ID %}
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA4_MEASUREMENT_ID|urlencode }}"></script>
+  <script>
+    window.gtag('js', new Date());
+    window.gtag('config', {{ GA4_MEASUREMENT_ID|tojson }});
+  </script>
+  <!-- End Google Analytics 4 -->
+  {% endif %}
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}?v={{ STATIC_VERSION }}">
   {% block head %}{% endblock %}
 </head>
 
 <body class="bg-paper text-slate-900 antialiased {{ body_class or '' }}" data-has-hero="{{ '1' if HAS_HERO else '0' }}">
+  {% if GTM_ID %}
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ GTM_ID|urlencode }}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  {% endif %}
+
   <!-- Header -->
   <header id="siteHeader" class="site-header {% if HAS_HERO %}is-transparent{% else %}is-solid{% endif %}">
     <div class="site-header-inner">
@@ -204,7 +260,7 @@
     <div class="mx-auto max-w-[1180px] px-5 md:px-8 pb-5">
       <div class="rounded-2xl border border-black/10 bg-white/95 backdrop-blur shadow-soft p-4 md:p-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="text-xs md:text-sm text-slate-700 leading-relaxed">
-          Ta strona korzysta z plików cookies niezbędnych do działania serwisu. Więcej informacji: <a class="underline" href="{{ url_for('policy', slug='cookies') }}">Polityka cookies</a>.
+          Ta strona korzysta z plików cookies niezbędnych do działania serwisu oraz — po akceptacji — z cookies analitycznych Google Analytics. Więcej informacji: <a class="underline" href="{{ url_for('policy', slug='cookies') }}">Polityka cookies</a>.
         </div>
         <div class="flex items-center gap-3">
           <button id="cookieAccept" class="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-xs md:text-sm bg-slate-900 text-white hover:bg-slate-800">Akceptuję</button>

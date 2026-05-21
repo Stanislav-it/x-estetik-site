@@ -32,3 +32,13 @@ Formularz kontaktowy zapisuje zgłoszenia do SQLite: `instance/app.db` (tabela `
 ## Katalog PDF
 Plik: `static/pdf/X-Estetik-Katalog-2025.pdf`  
 Podglądy stron zostały wyrenderowane do: `static/img/catalog/<slug>/`.
+
+## Google Tag Manager / GA4
+Projekt jest przygotowany pod zmienne środowiskowe w Render:
+
+- `GTM_ID` — ID kontenera Google Tag Manager, np. `GTM-XXXXXXX`
+- `GA4_MEASUREMENT_ID` — ID strumienia Google Analytics 4, np. `G-XXXXXXXXXX`
+
+Możesz użyć samego `GTM_ID` i skonfigurować tag GA4 w Google Tag Managerze albo dodać `GA4_MEASUREMENT_ID`, jeśli GA4 ma ładować się bezpośrednio przez `gtag.js`.
+
+Po akceptacji banera cookies strona aktualizuje Google Consent Mode i wysyła event `cookie_consent_granted` do `dataLayer`. Formularze kontaktowe wysyłają do `dataLayer` event `lead_form_submit`.
