@@ -358,39 +358,9 @@
 })();
 
 (function () {
-  // ---------------- Cookie notice (localStorage) ----------------
-  const banner = document.getElementById('cookieBanner');
-  const btn = document.getElementById('cookieAccept');
-  if (!banner || !btn) return;
-
-  const KEY = 'xestetik_cookie_consent_v1';
-  try {
-    if (window.localStorage && localStorage.getItem(KEY) === '1') return;
-  } catch (e) {
-    // If storage is blocked, just show the banner.
-  }
-
-  banner.classList.remove('hidden');
-
-  btn.addEventListener('click', () => {
-    try {
-      if (window.localStorage) localStorage.setItem(KEY, '1');
-    } catch (e) {
-      // ignore
-    }
-
-    // Grant analytics consent for GTM / GA4 after the visitor accepts cookies.
-    if (typeof window.gtag === 'function') {
-      window.gtag('consent', 'update', {
-        analytics_storage: 'granted'
-      });
-    }
-    if (window.dataLayer && Array.isArray(window.dataLayer)) {
-      window.dataLayer.push({ event: 'cookie_consent_granted' });
-    }
-
-    banner.classList.add('hidden');
-  });
+  // Cookie notice is handled inline in templates/base.html so it still works
+  // even if this optional bundle changes or is cached by the browser.
+  if (window.xEstetikCookies && window.xEstetikCookies.version) return;
 })();
 
 

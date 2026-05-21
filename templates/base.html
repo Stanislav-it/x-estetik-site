@@ -10,23 +10,42 @@
   {% if GTM_ID or GA4_MEASUREMENT_ID %}
   <!-- Google Consent Mode defaults + shared dataLayer -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
-    (function () {
-      var analyticsGranted = false;
-      try {
-        analyticsGranted = window.localStorage && localStorage.getItem('xestetik_cookie_consent_v1') === '1';
-      } catch (e) {}
+    (function (w, d) {
+      w.dataLayer = w.dataLayer || [];
+      w.gtag = w.gtag || function(){ w.dataLayer.push(arguments); };
 
-      window.gtag('consent', 'default', {
+      var CONSENT_KEY = 'xestetik_cookie_consent_v2';
+      var LEGACY_KEY = 'xestetik_cookie_consent_v1';
+
+      function readStoredConsent() {
+        var value = null;
+        try {
+          if (w.localStorage) {
+            value = localStorage.getItem(CONSENT_KEY) || localStorage.getItem(LEGACY_KEY);
+          }
+        } catch (e) {}
+
+        if (!value) {
+          try {
+            var match = d.cookie.match(/(?:^|;\s*)xestetik_cookie_consent=(granted|denied|1|0)/);
+            value = match ? decodeURIComponent(match[1]) : null;
+          } catch (e) {}
+        }
+
+        return value === 'granted' || value === '1';
+      }
+
+      var analyticsGranted = readStoredConsent();
+      w.gtag('consent', 'default', {
         ad_storage: 'denied',
         ad_user_data: 'denied',
         ad_personalization: 'denied',
         analytics_storage: analyticsGranted ? 'granted' : 'denied',
         functionality_storage: 'granted',
-        security_storage: 'granted'
+        security_storage: 'granted',
+        wait_for_update: 500
       });
-    })();
+    })(window, document);
   </script>
   {% endif %}
 
@@ -255,20 +274,151 @@
     </div>
   </footer>
 
-  <!-- Cookie notice (minimal, non-blocking; stores acceptance in localStorage) -->
-  <div id="cookieBanner" class="fixed inset-x-0 bottom-0 z-[99999] hidden">
+  <!-- Cookie notice (robust, non-blocking; stores consent in localStorage + cookie fallback) -->
+  <div id="cookieBanner" class="fixed inset-x-0 bottom-0 z-[99999] hidden" role="dialog" aria-live="polite" aria-label="Informacja o plikach cookies" data-analytics-enabled="{{ '1' if (GTM_ID or GA4_MEASUREMENT_ID) else '0' }}">
     <div class="mx-auto max-w-[1180px] px-5 md:px-8 pb-5">
       <div class="rounded-2xl border border-black/10 bg-white/95 backdrop-blur shadow-soft p-4 md:p-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div class="text-xs md:text-sm text-slate-700 leading-relaxed">
-          Ta strona korzysta z plików cookies niezbędnych do działania serwisu oraz — po akceptacji — z cookies analitycznych Google Analytics. Więcej informacji: <a class="underline" href="{{ url_for('policy', slug='cookies') }}">Polityka cookies</a>.
+          Ta strona korzysta z plików cookies niezbędnych do działania serwisu oraz — po akceptacji — z cookies analitycznych Google Analytics. Możesz zaakceptować analitykę albo zostać tylko przy cookies niezbędnych. Więcej informacji: <a class="underline" href="{{ url_for('policy', slug='cookies') }}">Polityka cookies</a>.
         </div>
-        <div class="flex items-center gap-3">
-          <button id="cookieAccept" class="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-xs md:text-sm bg-slate-900 text-white hover:bg-slate-800">Akceptuję</button>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 shrink-0">
+          <button id="cookieReject" type="button" class="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-xs md:text-sm border border-black/10 bg-white hover:bg-black/5">Tylko niezbędne</button>
+          <button id="cookieAccept" type="button" class="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-xs md:text-sm bg-slate-900 text-white hover:bg-slate-800">Akceptuję analitykę</button>
           <a class="inline-flex items-center justify-center rounded-2xl px-4 py-2 text-xs md:text-sm border border-black/10 hover:bg-black/5" href="{{ url_for('policy', slug='privacy') }}">Polityka prywatności</a>
         </div>
       </div>
     </div>
   </div>
+
+  <script>
+    (function () {
+      var CONSENT_KEY = 'xestetik_cookie_consent_v2';
+      var LEGACY_KEY = 'xestetik_cookie_consent_v1';
+      var COOKIE_NAME = 'xestetik_cookie_consent';
+      var banner = document.getElementById('cookieBanner');
+      if (!banner) return;
+
+      var acceptBtn = document.getElementById('cookieAccept');
+      var rejectBtn = document.getElementById('cookieReject');
+      var analyticsEnabled = banner.getAttribute('data-analytics-enabled') === '1';
+
+      function readConsent() {
+        var value = null;
+        try {
+          if (window.localStorage) {
+            value = localStorage.getItem(CONSENT_KEY) || localStorage.getItem(LEGACY_KEY);
+          }
+        } catch (e) {}
+        if (!value) {
+          try {
+            var match = document.cookie.match(/(?:^|;\s*)xestetik_cookie_consent=(granted|denied|1|0)/);
+            value = match ? decodeURIComponent(match[1]) : null;
+          } catch (e) {}
+        }
+        if (value === '1') return 'granted';
+        if (value === '0') return 'denied';
+        return value === 'granted' || value === 'denied' ? value : null;
+      }
+
+      function writeConsent(value) {
+        try {
+          if (window.localStorage) {
+            localStorage.setItem(CONSENT_KEY, value);
+            localStorage.removeItem(LEGACY_KEY);
+          }
+        } catch (e) {}
+        try {
+          document.cookie = COOKIE_NAME + '=' + encodeURIComponent(value) + '; Max-Age=31536000; Path=/; SameSite=Lax';
+        } catch (e) {}
+      }
+
+      function clearConsent() {
+        try {
+          if (window.localStorage) {
+            localStorage.removeItem(CONSENT_KEY);
+            localStorage.removeItem(LEGACY_KEY);
+          }
+        } catch (e) {}
+        try {
+          document.cookie = COOKIE_NAME + '=; Max-Age=0; Path=/; SameSite=Lax';
+        } catch (e) {}
+      }
+
+      function updateGoogleConsent(value) {
+        var granted = value === 'granted';
+        if (typeof window.gtag === 'function') {
+          window.gtag('consent', 'update', {
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied',
+            analytics_storage: granted ? 'granted' : 'denied',
+            functionality_storage: 'granted',
+            security_storage: 'granted'
+          });
+          if (granted) {
+            window.gtag('event', 'page_view', {
+              event_category: 'engagement',
+              event_label: 'cookie_consent_granted'
+            });
+          }
+        }
+        if (window.dataLayer && Array.isArray(window.dataLayer)) {
+          window.dataLayer.push({ event: granted ? 'cookie_consent_granted' : 'cookie_consent_denied' });
+        }
+      }
+
+      function showBanner() {
+        banner.classList.remove('hidden');
+        banner.removeAttribute('hidden');
+      }
+
+      function hideBanner() {
+        banner.classList.add('hidden');
+        banner.setAttribute('hidden', 'hidden');
+      }
+
+      function saveChoice(value) {
+        writeConsent(value);
+        updateGoogleConsent(value);
+        hideBanner();
+
+        // After first analytics consent, reload once so GTM/GA4 starts the page with granted consent.
+        // This makes GA4 Realtime checks much more reliable.
+        if (analyticsEnabled && value === 'granted') {
+          window.setTimeout(function () {
+            window.location.reload();
+          }, 120);
+        }
+      }
+
+      try {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('cookies') === 'reset') {
+          clearConsent();
+          showBanner();
+          return;
+        }
+      } catch (e) {}
+
+      var existing = readConsent();
+      if (existing === 'granted' || existing === 'denied') {
+        writeConsent(existing); // migrate legacy/localStorage-only values into the new cookie fallback
+        hideBanner();
+        return;
+      }
+
+      showBanner();
+      if (acceptBtn) acceptBtn.addEventListener('click', function () { saveChoice('granted'); });
+      if (rejectBtn) rejectBtn.addEventListener('click', function () { saveChoice('denied'); });
+
+      window.xEstetikCookies = {
+        version: 2,
+        show: showBanner,
+        reset: function () { clearConsent(); showBanner(); },
+        status: readConsent
+      };
+    })();
+  </script>
 
   {% block scripts %}{% endblock %}
 
