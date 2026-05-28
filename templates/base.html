@@ -3,9 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title or SITE_NAME }}</title>
-  <meta name="description" content="{{ meta_description or 'X‑Estetik — katalog urządzeń i technologii dla gabinetów oraz klinik.' }}">
+  {% set page_title = title or 'X‑Estetik — technologie kosmetyczne dla gabinetów' %}
+  {% set default_meta_description = 'Dystrybucja, doradztwo i wdrożenia urządzeń beauty opartych na sprawdzonych technologiach. Bez obietnic bez pokrycia.' %}
+  {% set page_description = meta_description or default_meta_description %}
+  {% set page_url = canonical_url or (SITE_URL ~ request.path) %}
+  {% set default_meta_image = SITE_URL ~ url_for('static', filename='img/og/x-estetik-meta-preview-20260528.jpg') %}
+  {% set page_image = meta_image or default_meta_image %}
+  {% set page_type = meta_type or 'website' %}
+
+  <title>{{ page_title }}</title>
+  <meta name="description" content="{{ page_description }}">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="{{ page_url }}">
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}">
+
+  <meta property="og:locale" content="pl_PL">
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:type" content="{{ page_type }}">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ page_description }}">
+  <meta property="og:url" content="{{ page_url }}">
+  <meta property="og:image" content="{{ page_image }}">
+  <meta property="og:image:secure_url" content="{{ page_image }}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="X‑Estetik — nowoczesne technologie kosmetyczne dla gabinetów">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page_title }}">
+  <meta name="twitter:description" content="{{ page_description }}">
+  <meta name="twitter:image" content="{{ page_image }}">
 
   {% if GTM_ID or GA4_MEASUREMENT_ID %}
   <!-- Google Consent Mode defaults + shared dataLayer -->

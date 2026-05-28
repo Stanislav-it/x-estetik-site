@@ -1,13 +1,11 @@
 {% extends "base.html" %}
 {% set title = product.name ~ " — X‑Estetik" %}
+{% set meta_type = "product" %}
+{% set meta_description = product.short or meta_description %}
+{% set meta_image = product.image_url %}
+{% set canonical_url = product.canonical_url %}
 
 {% block head %}
-  {% if product.canonical_url %}<link rel="canonical" href="{{ product.canonical_url }}">{% endif %}
-  <meta property="og:type" content="product">
-  <meta property="og:title" content="{{ product.name }}">
-  {% if product.short %}<meta property="og:description" content="{{ product.short }}">{% endif %}
-  {% if product.image_url %}<meta property="og:image" content="{{ product.image_url }}">{% endif %}
-  {% if product.canonical_url %}<meta property="og:url" content="{{ product.canonical_url }}">{% endif %}
   {% if product.price_amount %}
   <meta property="product:price:amount" content="{{ product.price_amount }}">
   <meta property="product:price:currency" content="{{ product.price_currency or 'PLN' }}">

@@ -936,6 +936,22 @@ def create_app() -> Flask:
             "R2_SHOWCASE": build_r2_showcase(),
 
         }
+
+    @app.after_request
+    def add_cache_headers(response):
+        """Force fresh HTML/metadata for crawlers, while keeping versioned static assets cacheable."""
+        path = request.path or ""
+
+        if path.startswith("/static/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            return response
+
+        if path == "/" or path.endswith((".html", ".xml", ".txt")):
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+
+        return response
     @app.get("/")
     def index():
         # Homepage blocks
